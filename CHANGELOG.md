@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v0.4.0 (2025-12-06)
+
+### Feature
+
+* feat: add export_onnx_model ([`bf0f6af`](https://github.com/agbleze/mining_sites_detector/commit/bf0f6afe809da1d7dd2efe83872e2e8c72fe2aad))
+
+### Style
+
+* style: remove unused imports ([`ca99b2a`](https://github.com/agbleze/mining_sites_detector/commit/ca99b2a7e9293c53d80b12db622cabd96fb73d80))
+
+* style: remove comments ([`f69620b`](https://github.com/agbleze/mining_sites_detector/commit/f69620be08e47f42f7c67a9eb05a88f4d9279199))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main ([`06a2d7d`](https://github.com/agbleze/mining_sites_detector/commit/06a2d7d5a58cb6f7df366e8caecaf74dd23f5eec))
+
 ## v0.3.0 (2025-12-02)
 
 ### Feature
@@ -7,6 +23,10 @@
 * feat: add make_prediction ([`cf00d9b`](https://github.com/agbleze/mining_sites_detector/commit/cf00d9b798f7a29ec29e23b4a73f74d15331d998))
 
 * feat: add logging ([`d097658`](https://github.com/agbleze/mining_sites_detector/commit/d0976586094f992ead653c45b608c4c998c510da))
+
+### Style
+
+* style: remove comments ([`dc17795`](https://github.com/agbleze/mining_sites_detector/commit/dc177950b2bd7da2e69b931979240116697217dd))
 
 ## v0.2.1 (2025-12-01)
 
