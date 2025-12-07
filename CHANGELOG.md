@@ -1,8 +1,18 @@
 # CHANGELOG
 
+## v0.5.0 (2025-12-07)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+
+update ([`ea50ae8`](https://github.com/agbleze/mining_sites_detector/commit/ea50ae8e5e872104d3faabc4db2a2632389ba33c))
+
 ## v0.4.0 (2025-12-06)
 
 ### Feature
+
+* feat: add export_to_onnx ([`72b7438`](https://github.com/agbleze/mining_sites_detector/commit/72b74387db28100452150e4c389ce85d612d1d48))
 
 * feat: add export_onnx_model ([`bf0f6af`](https://github.com/agbleze/mining_sites_detector/commit/bf0f6afe809da1d7dd2efe83872e2e8c72fe2aad))
 
