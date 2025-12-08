@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.6.0 (2025-12-08)
+
+### Feature
+
+* feat: add indices ([`a5de0dd`](https://github.com/agbleze/mining_sites_detector/commit/a5de0dd406793e9eb727bfb32ef52e314008b2d3))
+
 ## v0.5.0 (2025-12-07)
 
 ### Unknown
