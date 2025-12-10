@@ -1,6 +1,19 @@
 # CHANGELOG
 
+## v0.9.0 (2025-12-10)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+update ([`d6ee6ec`](https://github.com/agbleze/mining_sites_detector/commit/d6ee6ec534130714919db3b3d1d7806292d96efb))
+
 ## v0.8.0 (2025-12-10)
+
+### Feature
+
+* feat: add compute_BRBA ([`0873710`](https://github.com/agbleze/mining_sites_detector/commit/087371096ef03b30d2982baa2a95078208d3d550))
+
+* feat: add compute_BLFEI ([`84d29f8`](https://github.com/agbleze/mining_sites_detector/commit/84d29f8df1e537f98c7a03b5c2ce0a5024cb4cd5))
 
 ### Unknown
 
