@@ -1,6 +1,17 @@
 # CHANGELOG
 
+## v0.8.0 (2025-12-10)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+update ([`7cb1860`](https://github.com/agbleze/mining_sites_detector/commit/7cb186069ee459f9b2841d1b45522e1eaa6dc31a))
+
 ## v0.7.0 (2025-12-09)
+
+### Feature
+
+* feat: update indices ([`547296d`](https://github.com/agbleze/mining_sites_detector/commit/547296df521a678b861231c97ec49b47bc686e51))
 
 ### Unknown
 
