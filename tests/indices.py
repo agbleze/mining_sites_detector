@@ -260,6 +260,18 @@ class Sentinel2Dataset(object):
         bands_avg = (band3 + band4 + band12) / 3
         self.blfei = (bands_avg - band11) / (bands_avg + band11)
         
+    def compute_BRBA(self, img):
+        """
+        BRBA Band Ratio for Built-up Area
+        
+        """
+        b3_index = self.all_band_names.index("B03")
+        b8_index = self.all_band_names.index("B08")
+        band3 = img[:, :, b3_index]
+        band8 = img[:, :, b8_index]
+        self.BRBA = band3 / band8
+        return self.BRBA
+        
     
 #%%
 
