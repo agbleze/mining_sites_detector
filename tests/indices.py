@@ -229,6 +229,38 @@ class Sentinel2Dataset(object):
         self.built_up_bare_land_index = leftside_bbi + rightside_bbi
         return self.built_up_bare_land_index
 
+    
+    def compute_Brightness_index(self, img):
+        """
+        BI_Br BrightnessIndex
+        
+        """
+        B4_index = self.all_band_names.index("B04")
+        B8_index = self.all_band_names.index("B08")
+        band4 = img[:, :, B4_index]
+        band8 = img[:, :, B8_index]
+        leftside = band4**2
+        rightside = band8**2
+        self.brightness_index = np.sqrt(leftside + rightside)
+        return self.brightness_index
+    
+    def compute_BLFEI(self, img):
+        """
+        BLFEI Built-up Land Features Extraction Index
+        """
+        
+        b3_index = self.all_band_names.index("B03")
+        b4_index = self.all_band_names.index("B04")
+        b12_index = self.all_band_names.index("B12")
+        b11_index = self.all_band_names.index("B11")
+        band3 = img[:, :, b3_index]
+        band4 = img[:, :, b4_index]
+        band12 = img[:, :, b12_index]
+        band11 = img[:, :, b11_index]
+        bands_avg = (band3 + band4 + band12) / 3
+        self.blfei = (bands_avg - band11) / (bands_avg + band11)
+        
+    
 #%%
 
 
