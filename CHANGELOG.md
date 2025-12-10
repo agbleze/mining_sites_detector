@@ -1,8 +1,18 @@
 # CHANGELOG
 
+## v0.7.0 (2025-12-09)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+
+update ([`fb30d75`](https://github.com/agbleze/mining_sites_detector/commit/fb30d7564030bb31ef0622b219a8a2690398fa66))
+
 ## v0.6.0 (2025-12-08)
 
 ### Feature
+
+* feat: add Sentinel2Dataset ([`caa3936`](https://github.com/agbleze/mining_sites_detector/commit/caa39365d4000bad0bca314780d7b0c9343604b4))
 
 * feat: add indices ([`a5de0dd`](https://github.com/agbleze/mining_sites_detector/commit/a5de0dd406793e9eb727bfb32ef52e314008b2d3))
 
