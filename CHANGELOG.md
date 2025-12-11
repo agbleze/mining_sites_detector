@@ -1,8 +1,18 @@
 # CHANGELOG
 
+## v0.11.0 (2025-12-11)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+
+update ([`e5ad13a`](https://github.com/agbleze/mining_sites_detector/commit/e5ad13a498eb0d2cc872da660cf3537efbb89aa3))
+
 ## v0.10.0 (2025-12-11)
 
 ### Feature
+
+* feat: update compute_bare_soil_index ([`7d7ede2`](https://github.com/agbleze/mining_sites_detector/commit/7d7ede28d9cbb271ceeb824e3f1c66f824400341))
 
 * feat: add compute_bare_soil_index ([`d3f0d54`](https://github.com/agbleze/mining_sites_detector/commit/d3f0d54e669f33a66d030a79ef91fa78eeac5e4c))
 
