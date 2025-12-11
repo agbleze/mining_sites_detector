@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.10.0 (2025-12-11)
+
+### Feature
+
+* feat: add compute_bare_soil_index ([`d3f0d54`](https://github.com/agbleze/mining_sites_detector/commit/d3f0d54e669f33a66d030a79ef91fa78eeac5e4c))
+
 ## v0.9.0 (2025-12-10)
 
 ### Unknown
