@@ -290,6 +290,13 @@ class Sentinel2Dataset(object):
         band2 = img[:, :, b2_index]
         
         leftside_numerator = band12 + band4
+        rightside_numerator = band8 - band2
+        leftside_denominator = band12 + band4
+        rightside_denominator = band8 + band2
+        numerator = leftside_numerator - rightside_numerator
+        denominator = leftside_denominator + rightside_denominator
+        self.bare_soil_index = numerator / denominator
+        return self.bare_soil_index
         
     
 #%%
