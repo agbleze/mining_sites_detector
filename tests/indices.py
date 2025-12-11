@@ -272,6 +272,25 @@ class Sentinel2Dataset(object):
         self.BRBA = band3 / band8
         return self.BRBA
         
+    def compute_bare_soil_index(self, img):
+        """
+        BSI
+        Bare Soil Index
+        
+        :param self: Description
+        :param img: Description
+        """
+        b12_index = self.all_band_names.index("B12")
+        b4_index = self.all_band_names.index("B04")
+        b8_index = self.all_band_names.index("B08")
+        b2_index = self.all_band_names.index("B02")
+        band12 = img[:, :, b12_index]
+        band4 = img[:, :, b4_index]
+        band8 = img[:, :, b8_index]
+        band2 = img[:, :, b2_index]
+        
+        leftside_numerator = band12 + band4
+        
     
 #%%
 
