@@ -299,6 +299,19 @@ class Sentinel2Dataset(object):
         return self.bare_soil_index
         
     
+    def compute_crust_index(self, img):
+        b4_index = self.all_band_names.index("B04")
+        b2_index = self.all_band_names.index("B02")
+        band4 = img[:, :, b4_index]
+        band2 = img[:, :, b2_index]
+        numerator = (band4 - band2)
+        denominator = (band4 + band2)
+        res = numerator / denominator
+        self.crust_index = 1 - res
+        return self.crust_index
+    
+    
+    
 #%%
 
 
