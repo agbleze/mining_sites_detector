@@ -1,8 +1,17 @@
 # CHANGELOG
 
+## v0.13.0 (2025-12-14)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+update ([`3c3b3f2`](https://github.com/agbleze/mining_sites_detector/commit/3c3b3f2f0a4af8925e749f0d937a68399228715d))
+
 ## v0.12.0 (2025-12-13)
 
 ### Feature
+
+* feat: add compute_new_builtup_index ([`9c3da08`](https://github.com/agbleze/mining_sites_detector/commit/9c3da0805df87e589f92aea74783d906f84ea3e3))
 
 * feat: add compute_crust_index ([`54a376d`](https://github.com/agbleze/mining_sites_detector/commit/54a376d325e1313efe6d5de5a27ed86fcb0f9447))
 
