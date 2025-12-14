@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.12.0 (2025-12-13)
+
+### Feature
+
+* feat: add compute_crust_index ([`54a376d`](https://github.com/agbleze/mining_sites_detector/commit/54a376d325e1313efe6d5de5a27ed86fcb0f9447))
+
 ## v0.11.0 (2025-12-11)
 
 ### Unknown
