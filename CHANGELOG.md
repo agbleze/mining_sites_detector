@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.14.0 (2025-12-15)
+
+### Feature
+
+* feat: add compute_builtup_index ([`e52ba1a`](https://github.com/agbleze/mining_sites_detector/commit/e52ba1a26e5fdb3a66a020efc95cfb57933400b0))
+
 ## v0.13.0 (2025-12-14)
 
 ### Unknown
