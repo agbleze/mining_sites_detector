@@ -1,8 +1,21 @@
 # CHANGELOG
 
+## v0.15.0 (2025-12-15)
+
+### Feature
+
+* feat: add compute_CBI ([`a18adc5`](https://github.com/agbleze/mining_sites_detector/commit/a18adc58bb8780cebca21fc015454355178623aa))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+update ([`a0ec6fd`](https://github.com/agbleze/mining_sites_detector/commit/a0ec6fd6973ad9888300141df5a25922272e482a))
+
 ## v0.14.0 (2025-12-15)
 
 ### Feature
+
+* feat: add compute_PC ([`0a84a6f`](https://github.com/agbleze/mining_sites_detector/commit/0a84a6f46f71a7c15822ac571e820f3d19e8caa7))
 
 * feat: add compute_builtup_index ([`e52ba1a`](https://github.com/agbleze/mining_sites_detector/commit/e52ba1a26e5fdb3a66a020efc95cfb57933400b0))
 
