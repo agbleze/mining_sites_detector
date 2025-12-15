@@ -5,9 +5,17 @@ import numpy as np
 from glob import glob
 import os
 from mining_sites_detector.inputs import filepath, folder
+from sklearn.decomposition import PCA
 
 #%%
 
+def compute_PC(img, components: int):
+    H, W, C = img.shape
+    X = img.reshape(-1, C)
+    pca = PCA(n_components=components)
+    pc = pca.fit_transform(X)
+    pcimg = pc.reshape(H, W)
+    return pcimg
 
 #%%
 img = get_tiff_img(path=filepath, 
