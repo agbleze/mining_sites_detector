@@ -326,6 +326,28 @@ class Sentinel2Dataset(object):
         self.new_builtup_index = numerator / band8
         return self.new_builtup_index
     
+    def compute_builtup_index(self, img):
+        """
+        
+        BU
+        Built-up Index NDBI—NDVI
+        """
+        b8_index = self.all_band_names.index("B08")
+        b4_index = self.all_band_names.index("B04")
+        b11_index = self.all_band_names.index("B11")
+        band4 = img[:, :, b4_index]
+        band8 = img[:, :, b8_index]
+        band11 = img[:, :, b11_index]
+        ndvi_numerator = band8 - band4
+        ndvi_denominator = band8 + band4
+        ndvi = ndvi_numerator / ndvi_denominator
+        
+        ndbi_numerator = band11 - band8
+        ndbi_denominator = band11 + band8
+        ndbi = ndbi_numerator / ndbi_denominator
+        self.builtup_index = ndbi - ndvi
+        return self.builtup_index
+    
     
 #%%
 
