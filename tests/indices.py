@@ -381,6 +381,31 @@ class Sentinel2Dataset(object):
         cbi_denominator = cbi_leftside + savi
         self.cbi = cbi_numerator / cbi_denominator
         return self.cbi
+    
+    def compute_dry_bareness_index(self, img):
+        """
+        DBSI
+        Dry Bareness Index
+        """  
+        band4 = self.get_band(band_name="B04", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
+        band3 = self.get_band(band_name="B03", img=img)
+        band11 = self.get_band(band_name="B11", img=img)
+        
+        ndvi_numerator = band8 - band4
+        ndvi_denominator = band8 + band4
+        ndvi = ndvi_numerator / ndvi_denominator
+        dbsi_leftside = (band11 - band3) / (band11 + band3)
+        self.dry_bareness_index = dbsi_leftside - ndvi
+        return self.dry_bareness_index
+          
+    def get_band(self, band_name: str, img):
+        if band_name not in self.all_band_names:
+            raise ValueError(f"{band_name} is not a valid band. Valid bands are: {self.all_band_names}")
+        
+        band_index = self.all_band_names.index(band_name)
+        band = img[:, :, band_index]
+        return band
         
     
 #%%
