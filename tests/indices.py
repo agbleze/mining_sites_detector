@@ -340,12 +340,9 @@ class Sentinel2Dataset(object):
         BU
         Built-up Index NDBI—NDVI
         """
-        b8_index = self.all_band_names.index("B08")
-        b4_index = self.all_band_names.index("B04")
-        b11_index = self.all_band_names.index("B11")
-        band4 = img[:, :, b4_index]
-        band8 = img[:, :, b8_index]
-        band11 = img[:, :, b11_index]
+        band4 = self.get_band(band_name="B04", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
+        band11 = self.get_band(band_name="B11", img=img)
         ndvi_numerator = band8 - band4
         ndvi_denominator = band8 + band4
         ndvi = ndvi_numerator / ndvi_denominator
