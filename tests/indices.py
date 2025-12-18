@@ -308,10 +308,8 @@ class Sentinel2Dataset(object):
         
     
     def compute_crust_index(self, img):
-        b4_index = self.all_band_names.index("B04")
-        b2_index = self.all_band_names.index("B02")
-        band4 = img[:, :, b4_index]
-        band2 = img[:, :, b2_index]
+        band4 = self.get_band(band_name="B04", img=img)
+        band2 = self.get_band(band_name="B02", img=img)
         numerator = (band4 - band2)
         denominator = (band4 + band2)
         res = numerator / denominator
