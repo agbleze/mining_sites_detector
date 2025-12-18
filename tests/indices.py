@@ -362,13 +362,9 @@ class Sentinel2Dataset(object):
         Combinational Build-up Index
         
         """
-        
-        b3_index = self.all_band_names.index("B03")
-        b8_index = self.all_band_names.index("B08")
-        b4_index = self.all_band_names.index("B04")
-        band3 = img[:, :, b3_index]
-        band8 = img[:,:, b8_index]
-        band4 = img[:,:,b4_index]
+        band3 = self.get_band(band_name="B03", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
+        band4 = self.get_band(band_name="B04", img=img)
         ndwi_numerator = band3 - band8
         ndwi_denominator = band3 + band8
         ndwi = ndwi_numerator / ndwi_denominator
@@ -376,7 +372,7 @@ class Sentinel2Dataset(object):
         savi_denominator = band8 + band4 + 0.5
         savi = (savi_numerator / savi_denominator) * 1.5
         pc1 = compute_PC(img, components=1)
-        cbi_leftside = (pc1 + ndwi_numerator) / 2
+        cbi_leftside = (pc1 + ndwi) / 2
         cbi_numerator = cbi_leftside - savi
         cbi_denominator = cbi_leftside + savi
         self.cbi = cbi_numerator / cbi_denominator
