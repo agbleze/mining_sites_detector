@@ -1,10 +1,31 @@
 # CHANGELOG
 
+## v0.17.0 (2025-12-18)
+
+### Feature
+
+* feat: update compute_new_builtup_index ([`cd39ec7`](https://github.com/agbleze/mining_sites_detector/commit/cd39ec770920f633682a95771fa2c29aea51072c))
+
+### Fix
+
+* fix: update compute_crust_index ([`eee7221`](https://github.com/agbleze/mining_sites_detector/commit/eee7221356cded228425ceccb50e6a2229bfc66f))
+
+* fix: update compute_builtup_index ([`3cd2b31`](https://github.com/agbleze/mining_sites_detector/commit/3cd2b31127e741a1966d38c60029e26729245f4e))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+update ([`b9487b7`](https://github.com/agbleze/mining_sites_detector/commit/b9487b7fb2b09afeb91fdb2a6531c6fbab29d0d7))
+
 ## v0.16.0 (2025-12-17)
 
 ### Feature
 
 * feat: add compute_dry_bareness_index ([`c5252f2`](https://github.com/agbleze/mining_sites_detector/commit/c5252f28d6af47ef002bfe18a476d1889591d716))
+
+### Fix
+
+* fix: change formulae ([`f1a5b54`](https://github.com/agbleze/mining_sites_detector/commit/f1a5b5423cc472a14f4bd81a1427cf55fcbd1e4b))
 
 ## v0.15.0 (2025-12-15)
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mining_sites_detector"
-version = "0.16.0"
+version = "0.17.0"
 description = "Codebase for training model on sentinel 2 data to detect mining sites"
 authors = ["agbleze"]
 license = "MIT"
