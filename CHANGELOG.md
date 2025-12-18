@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.16.0 (2025-12-17)
+
+### Feature
+
+* feat: add compute_dry_bareness_index ([`c5252f2`](https://github.com/agbleze/mining_sites_detector/commit/c5252f28d6af47ef002bfe18a476d1889591d716))
+
 ## v0.15.0 (2025-12-15)
 
 ### Feature
