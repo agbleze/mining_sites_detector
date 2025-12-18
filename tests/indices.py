@@ -324,12 +324,9 @@ class Sentinel2Dataset(object):
         NBI
         New Built-up Index
         """
-        b4_index = self.all_band_names.index("B04")
-        b11_index = self.all_band_names.index("B11")
-        b8_index = self.all_band_names.index("B08")
-        band4 = img[:, :, b4_index]
-        band11 = img[:, :, b11_index]
-        band8 = img[:, :, b8_index]
+        band4 = self.get_band(band_name="B04", img=img)
+        band11 = self.get_band(band_name="B11", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
         numerator = band4 * band11
         self.new_builtup_index = numerator / band8
         return self.new_builtup_index
