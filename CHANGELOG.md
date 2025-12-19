@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v0.17.1 (2025-12-19)
+
+### Fix
+
+* fix: change cal_alteration_index to compute_alteration_index ([`195076b`](https://github.com/agbleze/mining_sites_detector/commit/195076bc44877d038e38ee0014ec20879155c434))
+
+* fix: change cal_ferrous_silicates_index to compute_ferrous_silicates_index ([`baf3bfb`](https://github.com/agbleze/mining_sites_detector/commit/baf3bfb539a294bb73c2bafcb5e3b13d86dcc5e9))
+
+* fix: rename cal_gossan_index to compute_gossan_index ([`aa8c512`](https://github.com/agbleze/mining_sites_detector/commit/aa8c512411c3b0c41d380b8711013bd48cf04817))
+
+* fix: rename cal_gossan_index to compute_gossan_index ([`7bc3fd7`](https://github.com/agbleze/mining_sites_detector/commit/7bc3fd71332ef110cb8a567806a548b2548f25fb))
+
+* fix: use get_band to fetch bands ([`d9e6f7e`](https://github.com/agbleze/mining_sites_detector/commit/d9e6f7e467651c2aefc48790cc535fff89095965))
+
 ## v0.17.0 (2025-12-18)
 
 ### Feature
