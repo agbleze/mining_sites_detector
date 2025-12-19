@@ -148,11 +148,9 @@ class Sentinel2Dataset(object):
         self.iron_oxide = band5 / band1
         return self.iron_oxide
     
-    def cal_gossan_index(self, img):
-        B11_index = self.all_band_names.index("B11")
-        B4_index = self.all_band_names.index("B04")
-        band4 = img[:, :, B4_index]
-        band11 = img[:, :, B11_index]        
+    def compute_gossan_index(self, img):
+        band4 = self.get_band(band_name="B04", img=img)
+        band11 = self.get_band(band_name="B11", img=img)       
         self.gossan = band11 / band4
         return self.gossan
     
@@ -167,12 +165,9 @@ class Sentinel2Dataset(object):
         The resulting values for bare soil are typically positive and higher than for other land
         
         """
-        B12_index = self.all_band_names.index("B12")
-        B8_index = self.all_band_names.index("B08")
-        B11_index = self.all_band_names.index("B11")
-        band12 = img[:, :, B12_index]
-        band8 = img[:, :, B8_index]
-        band11 = img[:, :, B11_index]   
+        band12 = self.get_band(band_name="B12", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
+        band11 = self.get_band(band_name="B11", img=img)  
         mbi_numerator = band11 - band12 - band8
         mbi_denominator = band11 + band12 + band8     
         self.modified_baresoil = (mbi_numerator / mbi_denominator) + 0.5
@@ -186,12 +181,9 @@ class Sentinel2Dataset(object):
         
         Equation is cited from: 
         """
-        B4_index = self.all_band_names.index("B04")
-        B8_index = self.all_band_names.index("B08")
-        B11_index = self.all_band_names.index("B11")
-        band4 = img[:, :, B4_index]
-        band8 = img[:, :, B8_index]
-        band11 = img[:, :, B11_index]   
+        band4 = self.get_band(band_name="B04", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
+        band11 = self.get_band(band_name="B11", img=img)  
         self.three_band_urband_index =  band4 + band11 - band8  
         return self.three_band_urband_index
     
@@ -204,12 +196,9 @@ class Sentinel2Dataset(object):
         
         Equation is cited from: 
         """
-        B4_index = self.all_band_names.index("B04")
-        B3_index = self.all_band_names.index("B03")
-        B11_index = self.all_band_names.index("B11")
-        band4 = img[:, :, B4_index]
-        band3 = img[:, :, B3_index]
-        band11 = img[:, :, B11_index]   
+        band4 = self.get_band(band_name="B04", img=img)
+        band3 = self.get_band(band_name="B03", img=img)
+        band11 = self.get_band(band_name="B11", img=img)   
         baei_numerator = band4 + 0.3
         baei_denominator = band3 + band11
         self.built_up_area_extraction_index = baei_numerator / baei_denominator
@@ -221,13 +210,9 @@ class Sentinel2Dataset(object):
         
         Equation is cited from: 
         """
-        B2_index = self.all_band_names.index("B02")
-        B3_index = self.all_band_names.index("B03")
-        B4_index = self.all_band_names.index("B04")
-        
-        band4 = img[:, :, B4_index]
-        band2 = img[:, :, B2_index]
-        band3 = img[:, :, B3_index]   
+        band4 = self.get_band(band_name="B04", img=img)
+        band2 = self.get_band(band_name="B02", img=img)
+        band3 = self.get_band(band_name="B03", img=img) 
         leftside_bbi_numerator = band2 - band3
         leftside_bbi_denominator = band2 + band3
         rightside_bbi_numerator = band4 - band3
@@ -243,10 +228,8 @@ class Sentinel2Dataset(object):
         BI_Br BrightnessIndex
         
         """
-        B4_index = self.all_band_names.index("B04")
-        B8_index = self.all_band_names.index("B08")
-        band4 = img[:, :, B4_index]
-        band8 = img[:, :, B8_index]
+        band4 = self.get_band(band_name="B04", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
         leftside = band4**2
         rightside = band8**2
         self.brightness_index = np.sqrt(leftside + rightside)
