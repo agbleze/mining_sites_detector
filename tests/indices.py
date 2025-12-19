@@ -132,11 +132,9 @@ class Sentinel2Dataset(object):
         self.ferrous_iron = band_x + band_y
         return self.ferrous_iron
     
-    def cal_ferrous_silicates_index(self, img):
-        B12_index = self.all_band_names.index("B12")
-        B11_index = self.all_band_names.index("B11")
-        band12 = img[:, :, B12_index]
-        band11 = img[:, :, B11_index]        
+    def compute_ferrous_silicates_index(self, img):
+        band12 = self.get_band(band_name="B12", img=img)
+        band11 = self.get_band(band_name="B11", img=img)      
         self.ferrous_silicates = band12 / band11
         return self.ferrous_silicates
         
