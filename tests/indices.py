@@ -273,10 +273,8 @@ class Sentinel2Dataset(object):
         BRBA Band Ratio for Built-up Area
         
         """
-        b3_index = self.all_band_names.index("B03")
-        b8_index = self.all_band_names.index("B08")
-        band3 = img[:, :, b3_index]
-        band8 = img[:, :, b8_index]
+        band3 = self.get_band(band_name="B03", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
         self.BRBA = band3 / band8
         return self.BRBA
         
@@ -288,14 +286,10 @@ class Sentinel2Dataset(object):
         :param self: Description
         :param img: Description
         """
-        b12_index = self.all_band_names.index("B12")
-        b4_index = self.all_band_names.index("B04")
-        b8_index = self.all_band_names.index("B08")
-        b2_index = self.all_band_names.index("B02")
-        band12 = img[:, :, b12_index]
-        band4 = img[:, :, b4_index]
-        band8 = img[:, :, b8_index]
-        band2 = img[:, :, b2_index]
+        band12 = self.get_band(band_name="B12", img=img)
+        band4 = self.get_band(band_name="B04", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
+        band2 = self.get_band(band_name="B02", img=img)
         
         leftside_numerator = band12 + band4
         rightside_numerator = band8 - band2
