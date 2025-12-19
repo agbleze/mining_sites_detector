@@ -98,34 +98,25 @@ class Sentinel2Dataset(object):
         print("completed reading images.")
         
         
-    def cal_alteration_index(self, img):
-        B11_index = self.all_band_names.index("B11")
-        B12_index = self.all_band_names.index("B12")
-        band11 = img[:, :, B11_index]
-        band12 = img[:, :, B12_index]        
+    def compute_alteration_index(self, img):
+        band11 = self.get_band(band_name="B11", img=img)
+        band12 = self.get_band(band_name="B12", img=img)      
         self.alteration = (band11 / band12)
         return self.alteration
         
         
-    def cal_ferric_oxide_index(self, img):
-        B11_index = self.all_band_names.index("B11")
-        B8_index = self.all_band_names.index("B08")
-        band11 = img[:, :, B11_index]
-        band8 = img[:, :, B8_index]
+    def compute_ferric_oxide_index(self, img):
+        band11 = self.get_band(band_name="B11", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
         self.ferric_oxide = band11 / band8
         return self.ferric_oxide
     
     
-    def cal_ferrous_iron_index(self, img):
-        B12_index = self.all_band_names.index("B12")
-        B8_index = self.all_band_names.index("B08")
-        B3_index = self.all_band_names.index("B03")
-        B4_index = self.all_band_names.index("B04")
-
-        band12 = img[:, :, B12_index]
-        band8 = img[:, :, B8_index]
-        band3 = img[:, :, B3_index]
-        band4 = img[:, :, B4_index]
+    def compute_ferrous_iron_index(self, img):
+        band12 = self.get_band(band_name="B12", img=img)
+        band8 = self.get_band(band_name="B08", img=img)
+        band3 = self.get_band(band_name="B03", img=img)
+        band4 = self.get_band(band_name="B04", img=img)
         
         band_x = band12 / band8
         band_y = band3 / band4
