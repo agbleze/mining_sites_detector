@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.18.0 (2025-12-20)
+
+### Feature
+
+* feat: add import_utils ([`1df9966`](https://github.com/agbleze/mining_sites_detector/commit/1df9966150123360f1f438b9cfe074364cafe403))
+
+* feat: add index ([`96b7171`](https://github.com/agbleze/mining_sites_detector/commit/96b7171dab46a49ee24250dc2b3ce5a72a096873))
+
 ## v0.17.1 (2025-12-19)
 
 ### Fix
