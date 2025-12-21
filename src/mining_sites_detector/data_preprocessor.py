@@ -1,48 +1,25 @@
 
 import os
-import tempfile
-from urllib.parse import urlparse
 import matplotlib.pyplot as plt
 import torch
-from torch.utils.data import DataLoader
-from torchgeo.datasets import RasterDataset, stack_samples, unbind_samples
-from torchgeo.datasets.utils import download_url
-from torchgeo.samplers import RandomGeoSampler
-import rasterio
+from torchgeo.datasets import stack_samples
 from rasterio import plot
-
-from torchvision.datasets.folder import DatasetFolder
-from torchvision.datasets.vision import VisionDataset
 from typing import Union, Callable, Any, Optional, Tuple, List, Dict, cast
 from pathlib import Path
 import os
 import numpy as np
 import pandas as pd
-import rasterio
 from torch import Tensor
 import torch
-from torchgeo.datasets import RasterDataset, stack_samples, unbind_samples
+from torchgeo.datasets import stack_samples
 from torchgeo.datasets.geo import NonGeoClassificationDataset
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
-from torchgeo.transforms import AugmentationSequential, indices
-import matplotlib.ticker as mticker
-from sklearn.model_selection import train_test_split
-from glob import glob
 import os
-import shutil
-from torchgeo.samplers import RandomGeoSampler
-from torch.utils.data import DataLoader
-from torchvision import datasets, models, transforms
-import torch.nn as nn
-from torch.optim import SGD, Adam
+from torchvision import transforms
 import torch
-from torchsummary import summary
-from torchgeo.models import ResNet18_Weights, ViTSmall16_Weights
-import timm
-from torch_snippets import Report
-
-
+from mining_sites_detector.index import Sentinel2Dataset
+from mining_sites_detector.import_utils import get_tiff_img
 
 
 class MineSiteImageFolder(Dataset):
@@ -200,7 +177,8 @@ class NonGeoMineSiteClassificationDataset(MineSiteImageFolder):
                  img_idx: Optional[Union[int, None]] = None,
                  return_all_bands=False,
                  bands=("B04", "B03", "B02"),
-                 normalize_bands=True
+                 normalize_bands=True,
+                 create_indices = True
                  ) -> None:
         self.root = root
         self.loader = loader
@@ -211,6 +189,7 @@ class NonGeoMineSiteClassificationDataset(MineSiteImageFolder):
         self.return_all_bands = return_all_bands
         self.bands = bands
         self.normalize_bands = normalize_bands
+        self.create_indices = create_indices
         super().__init__(
                         root=root,
                         is_valid_file=is_valid_file,
@@ -241,13 +220,46 @@ class NonGeoMineSiteClassificationDataset(MineSiteImageFolder):
             
         """
         self.img, self.label = self.mnfolder[index]
+        # create indices and stack
+        _created_indices = False
+        if self.create_indices:
+            indices_creater = Sentinel2Dataset(img_folder=self.root, load_on_initialize=False)
+            feoxide = indices_creater.compute_ferric_oxide_index(img=self.img)
+            mbsi = indices_creater.compute_modified_baresoil_index(self.img)
+            brightness_index = indices_creater.compute_Brightness_index(self.img)
+            alteration_index = indices_creater.compute_alteration_index(self.img)
+            builtup_index = indices_creater.compute_builtup_index(self.img)
+            fesil = indices_creater.compute_ferrous_silicates_index(self.img)
+            gossan_index = indices_creater.compute_gossan_index(self.img)
+            ironoxide = indices_creater.compute_iron_oxide_index(self.img)
+            dry_bareness = indices_creater.compute_dry_bareness_index(self.img)
+            crust = indices_creater.compute_crust_index(self.img)
+            bbi = indices_creater.compute_BBI(self.img)
+            soil_index = indices_creater.compute_bare_soil_index(img=self.img)
+            brba = indices_creater.compute_BRBA(self.img)
+            #baei = indices_creater.compute_BAEI(self.img)
+            
+            indices = np.dstack([feoxide, brightness_index, alteration_index, builtup_index, fesil,
+                                gossan_index, ironoxide, dry_bareness, crust, bbi, soil_index, brba,
+                                #baei
+                                ]
+                                )
+            #print(f"shape indices:{indices.shape}")
+            
+            _created_indices= True
+            
+        # permute indices
+        if _created_indices:
+            indices_tensor = torch.tensor(indices).permute(2,0,1).float()
+        else:
+            indices_tensor = None
         img_tensor = torch.tensor(self.img).permute(2,0,1).float()
         label_tensor = torch.tensor(self.label).float()
-        return img_tensor, label_tensor
+        return img_tensor, label_tensor, indices_tensor
     
     def __getitem__(self, index: int) -> dict[str, Tensor]:
-        image, label = self._load_image(index)
-        sample = {"image": image, "label": label}
+        image, label, indice = self._load_image(index)
+        sample = {"image": image, "label": label, "indice": indice}
         
         if self.transforms:
             sample = self.transforms(sample)
@@ -293,6 +305,7 @@ class MineSiteDataset(NonGeoMineSiteClassificationDataset):
                  return_all_bands=False, 
                  bands=("B04", "B03", "B02"),
                 normalize_bands=True,
+                create_indices: bool = False
                  #index=1
                 ):
         self.root = root
@@ -308,7 +321,8 @@ class MineSiteDataset(NonGeoMineSiteClassificationDataset):
         self.band_indices = Tensor([self.all_band_names.index(b) for b in self.all_band_names]).long()
         self.return_all_bands = return_all_bands
         self.normalize_bands = normalize_bands
-        #self.index=index
+        self.create_indices = create_indices
+
         super().__init__(root=self.root, target_file_path= self.target_file_path,
                          target_file_has_header=self.target_file_has_header,
                         fetch_for_all_classes=self.fetch_for_all_classes,
@@ -317,17 +331,14 @@ class MineSiteDataset(NonGeoMineSiteClassificationDataset):
                         return_all_bands=return_all_bands,
                         bands=bands,
                         normalize_bands=self.normalize_bands,
+                        create_indices=self.create_indices
                         )
     
     
     
     def __getitem__(self,index):
-        #if not index:
-        #    index = self.index
-        img, label = self._load_image(index)
-        #img = torch.index_select(img, dim=0, index=self.band_indices).float()
-        #img = np.dstack([band for band in img])
-        self.sample = {"image": img, "label": label}
+        img, label, indice = self._load_image(index)
+        self.sample = {"image": img, "label": label, "indice": indice}
         if self.transforms:
             self.sample = self.transforms(self.sample)
 
@@ -368,31 +379,6 @@ class MineSiteDataset(NonGeoMineSiteClassificationDataset):
 
 
 
-def get_tiff_img(path, return_all_bands, bands=("B01", "B03", "B02"),
-                 normalize_bands=True
-                ):
-    all_band_names = ("B01","B02", "B03","B04","B05", "B06",
-                      "B07","B08","B8A","B09","B11","B12"
-                    )
-    if return_all_bands:
-        band_indexs = [all_band_names.index(band_name) for band_name in all_band_names]
-    
-    else:
-        band_indexs = [all_band_names.index(band_name) for band_name in bands]
-
-    with rasterio.open(path) as src:
-        img_bands = [src.read(band) for band in range(1,13)]
-    dstacked_bands = np.dstack([img_bands[band_index] for band_index in band_indexs])
-    #dstacked_bands = np.dstack([img_bands[3], img_bands[2], img_bands[1]])
-    if normalize_bands:
-        # Normalize bands to 0-255
-        dstacked_bands = ((dstacked_bands - dstacked_bands.min()) / 
-                          (dstacked_bands.max() - dstacked_bands.min()) * 255
-                          ).astype(np.uint8)
-
-    return dstacked_bands
-
-
 def get_data(train_img_dir, val_image_dir, 
              train_target_file_path: str,
              val_target_file_path: str,
@@ -401,14 +387,18 @@ def get_data(train_img_dir, val_image_dir,
              return_all_bands=True,
              batch_size=10, drop_last=True,
              num_workers=4,
-             transforms: Union[Callable, None]=None
+             transforms: Union[Callable, None]=None,
+             normalize_bands=True, 
+             create_indices: bool = False
             ):
     train_dataset = MineSiteDataset(root=train_img_dir, 
                                     target_file_path=train_target_file_path,
                                     target_file_has_header=target_file_has_header, 
                                     loader=loader,
                                     return_all_bands=return_all_bands,
-                                    transforms=transforms
+                                    transforms=transforms,
+                                    normalize_bands=normalize_bands,
+                                    create_indices=create_indices
                                     
                                     )
     val_dataset = MineSiteDataset(root=val_image_dir, 
@@ -416,7 +406,8 @@ def get_data(train_img_dir, val_image_dir,
                                     target_file_has_header=target_file_has_header, 
                                     loader=loader,
                                     return_all_bands=return_all_bands,
-                                    transforms=transforms
+                                    transforms=transforms, normalize_bands=normalize_bands,
+                                    create_indices=create_indices
                                     
                                     )
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
