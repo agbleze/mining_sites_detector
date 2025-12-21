@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.19.0 (2025-12-21)
+
+### Feature
+
+* feat: add PrestemNormTransform ([`3ee64b8`](https://github.com/agbleze/mining_sites_detector/commit/3ee64b84ce0165cbf71ba2b6dc987d1f56ed7772))
+
+### Fix
+
+* fix: remove unused imports ([`40a7642`](https://github.com/agbleze/mining_sites_detector/commit/40a76425c0710bb1a3d565d7e4136da94bd47190))
+
 ## v0.18.0 (2025-12-20)
 
 ### Feature
