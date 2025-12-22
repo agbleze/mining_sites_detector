@@ -1,8 +1,7 @@
-from data_preprocessor import get_tiff_img
+from mining_sites_detector.import_utils import get_tiff_img
 import torch
 from pathlib import Path
 from typing import Union
-#from mining_sites_detector import logger
 
 def load_torchscript_model(model_path: Union[str, Path], device="cuda"):
     model = torch.jit.load(model_path, map_location=device)
@@ -11,9 +10,9 @@ def load_torchscript_model(model_path: Union[str, Path], device="cuda"):
 
 def predict_image(model, img, device="cuda"):
     img_tensor = torch.tensor(img).permute(2,0,1).float()
-    img_tensor = img_tensor.to("cuda").unsqueeze(0)
+    img_tensor = img_tensor.to(device).unsqueeze(0)
         
-    model = model.to("cuda")
+    model = model.to(device)
     with torch.no_grad():
         prediction = model(img_tensor)
     return prediction
