@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.20.0 (2025-12-22)
+
+### Feature
+
+* feat: add predict module ([`c58058d`](https://github.com/agbleze/mining_sites_detector/commit/c58058df5214550e369da657984e505b8e5b38d4))
+
 ## v0.19.0 (2025-12-21)
 
 ### Feature
