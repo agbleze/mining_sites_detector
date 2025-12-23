@@ -1,8 +1,17 @@
 # CHANGELOG
 
+## v0.21.0 (2025-12-23)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+update ([`5bf0b84`](https://github.com/agbleze/mining_sites_detector/commit/5bf0b842ba6c08a5345e8936a22e647abc04b5e4))
+
 ## v0.20.0 (2025-12-22)
 
 ### Feature
+
+* feat: update model_trainer with SOTA architectures ([`255f346`](https://github.com/agbleze/mining_sites_detector/commit/255f346988058f0f48e8a03f3de13292d5eec8cc))
 
 * feat: add predict module ([`c58058d`](https://github.com/agbleze/mining_sites_detector/commit/c58058df5214550e369da657984e505b8e5b38d4))
 
