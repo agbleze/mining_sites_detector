@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.22.0 (2025-12-24)
+
+### Feature
+
+* feat: add densenet arch ([`4a3163e`](https://github.com/agbleze/mining_sites_detector/commit/4a3163ea0c7d56110aa974347c5c45f562cab028))
+
 ## v0.21.0 (2025-12-23)
 
 ### Unknown
