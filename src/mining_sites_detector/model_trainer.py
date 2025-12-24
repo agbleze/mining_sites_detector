@@ -461,7 +461,7 @@ def learner(groups):
     return nn.Sequential(grp1, *other_gpr_collections)
 
 
-class classifier(nn.Module):
+class ClassifierResnet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         self.pool = nn.AdaptiveAvgPool2d((1,1))
@@ -505,7 +505,6 @@ class StemDenseNet(nn.Module):
 class DenseBlock(nn.Module):
     def __init__(self, n_filters):
         super().__init__()
-        shortcut = x
         
         # BN-RE-Conv 1x1
         # demensionality expansion, expand filters by 4 (DenseNet-B)
@@ -526,6 +525,8 @@ class DenseBlock(nn.Module):
         self.act2 = nn.ReLU()
         
     def forward(self, x):
+        shortcut = x
+
         x = self.bn1(x)
         x = self.act1(x)
         x = self.conv1(x)
@@ -534,7 +535,7 @@ class DenseBlock(nn.Module):
         x = self.act2(x)
         x = self.conv2(x)
         
-        x = torch.cat(self.shortcut, x, dim=1)
+        x = torch.cat(shortcut, x, dim=1)
         return x
         
         
@@ -560,9 +561,55 @@ class TransBlock(nn.Module):
         return x
     
     
+def group_densenet(n_blocks, n_filters, reduction=None):
+    # construct group of dense blocks
+    block_collection = []
+    
+    for _ in range(n_blocks):
+        dense_block = DenseBlock(n_filters=n_filters)
+        block_collection.append(dense_block)
+        
+    if reduction:
+        trans_block = TransBlock(reduction=reduction)
+        block_collection.append(trans_block)
+    
+    return nn.Sequential(**block_collection)
+        
+
+def learner_densenet(groups, n_filters, reduction):
+    last = groups.pop()
+    group_collection = []
+    for n_blocks in groups:
+        grp = group_densenet(n_blocks=n_blocks,
+                             n_filters=n_filters,
+                             reduction=reduction
+                             )
+        group_collection.append(grp)
+    # last group without transition block
+    group_collection.append(group_densenet(n_blocks=last,
+                                           n_filters=n_filters,
+                                           reduction=None
+                                           )
+                            )
+    return nn.Sequential(**group_collection)
 
 
-
+class ClassifierDenseNet(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        self.pool = nn.AdaptiveAvgPool2d(output_size=(1,1))
+        self.fc = nn.LazyLinear(out_features=num_classes)
+        self.act = nn.Softmax(dim=1)
+    
+    
+    def forward(self, x):
+        x = self.pool(x)
+        x = torch.flatten(x, dim=1)
+        x = self.fc(x)
+        x = self.act(x)
+        return x
+        
+    
 def init_he(m):
     if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
         nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
@@ -579,27 +626,33 @@ def get_stem_module(stem_type, in_channels=None, out_channels=64):
         return ResneXt_stem(in_channels=in_channels)
     elif stem_type == "xception":
         return Xception_stem(in_channel=in_channels)
+    elif stem_type == "densenet":
+        return StemDenseNet(out_channels=out_channels)
     else:
         raise ValueError(f"Unsupported stem type: {stem_type}")
     
     
 def build_model(stem_type, num_classes, group_params,
-                example_input=None, in_channels=None
+                example_input=None, in_channels=None,
+                n_filters: int = 32,
+                reduction: float = 0.5
                 ):
-    stem = get_stem_module(stem_type=stem_type,
-                           in_channels=in_channels,
-                           out_channels=64
-                           )
+    stem_module = get_stem_module(stem_type=stem_type,
+                                in_channels=in_channels,
+                                out_channels=64
+                                )
     print(f"Using stem: {stem_type}")
-    print(stem)
-    learner_module = learner(groups=group_params)
-    classif_head = classifier(num_classes=num_classes)
-    
-    model = nn.Sequential(
-                stem,
-                learner_module,
-                classif_head
-            )
+    if stem_type == "resnet":
+        learner_module = learner(groups=group_params)
+        task_module = ClassifierResnet(num_classes=num_classes)
+    elif stem_type == "densenet":
+        learner_module = learner_densenet(groups=group_params,
+                                          n_filters=n_filters,
+                                          reduction=reduction
+                                          )
+        task_module = ClassifierDenseNet(num_classes=num_classes)
+
+    model = nn.Sequential(stem_module, learner_module,task_module)
     if example_input is None:
         if not in_channels:
             in_channels = 3
@@ -612,19 +665,30 @@ def build_model(stem_type, num_classes, group_params,
 #%%
 
 
-model = build_model(stem_type="resnet",
+resnet_model = build_model(stem_type="resnet",
             num_classes=2,
             group_params=[(64, 3), (128, 4), (256, 6), (512, 3)],
             in_channels=3
             )
 #%%
-model.parameters()
+resnet_model
 
-         
+#%%
+densenet_model = build_model(stem_type="densenet",
+                             num_classes=2,
+                             group_params=[6,12,24,16],#n_blocks per group
+                             n_filters=32,
+                             reduction=0.5,
+                             in_channels=3
+                             )
+
+#%%
+densenet_model.parameters()
+
 #%%            
 """
 
-The key is the convolution output size formula:
+convolution output size formula:
 
 output_size = ((in_size + 2 * padding - kernel_size) / stride) + 1
 """
