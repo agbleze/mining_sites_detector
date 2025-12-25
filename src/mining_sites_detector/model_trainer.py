@@ -1,11 +1,10 @@
-#%% from pyexpat import model
+#%% 
 import numpy as np
 import torch
 from torch_snippets import Report
 import torch.nn as nn
 import os
 from copy import deepcopy
-from tqdm import tqdm
 
 @torch.no_grad()
 def accuracy(x, y, model):
