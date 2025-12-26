@@ -32,7 +32,6 @@ def train_batch(x, y, model, loss_fn, optimizer):
                          y)
     batch_loss.backward()
     optimizer.step()
-    #optimizer.zero_grad()
     return batch_loss.item()
 
 
