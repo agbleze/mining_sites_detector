@@ -14,7 +14,6 @@ import torch
 from torchgeo.datasets import stack_samples
 from torchgeo.datasets.geo import NonGeoClassificationDataset
 from torch.utils.data import Dataset, DataLoader
-import matplotlib.pyplot as plt
 import os
 from torchvision import transforms
 import torch
