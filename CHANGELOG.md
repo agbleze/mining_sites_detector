@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.22.1 (2025-12-27)
+
+### Fix
+
+* fix: remove duplicate import ([`6634bd7`](https://github.com/agbleze/mining_sites_detector/commit/6634bd77a976ab2e15aaa25d103a01cd440ced39))
+
+### Style
+
+* style: remove comment ([`52a9c56`](https://github.com/agbleze/mining_sites_detector/commit/52a9c564225b81200bebd18d54f90c1ccd8870a6))
+
+* style: remove unused imports ([`0a6a00c`](https://github.com/agbleze/mining_sites_detector/commit/0a6a00c9269150a3f673ad7b184e9b0a1fdb7808))
+
 ## v0.22.0 (2025-12-24)
 
 ### Feature
