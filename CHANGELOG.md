@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.22.2 (2025-12-28)
+
+### Fix
+
+* fix: remove unused imports ([`e229483`](https://github.com/agbleze/mining_sites_detector/commit/e22948334ae0ab9b98868abc33c7ae3d7dada2d2))
+
 ## v0.22.1 (2025-12-27)
 
 ### Fix
