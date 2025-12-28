@@ -6,7 +6,6 @@ from torchgeo.datasets import stack_samples
 from rasterio import plot
 from typing import Union, Callable, Any, Optional, Tuple, List, Dict, cast
 from pathlib import Path
-import os
 import numpy as np
 import pandas as pd
 from torch import Tensor
@@ -14,7 +13,6 @@ import torch
 from torchgeo.datasets import stack_samples
 from torchgeo.datasets.geo import NonGeoClassificationDataset
 from torch.utils.data import Dataset, DataLoader
-import os
 from torchvision import transforms
 import torch
 from mining_sites_detector.index import Sentinel2Dataset
