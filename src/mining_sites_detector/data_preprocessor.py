@@ -14,7 +14,6 @@ from torchgeo.datasets import stack_samples
 from torchgeo.datasets.geo import NonGeoClassificationDataset
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
-import torch
 from mining_sites_detector.index import Sentinel2Dataset
 from mining_sites_detector.import_utils import get_tiff_img
 
