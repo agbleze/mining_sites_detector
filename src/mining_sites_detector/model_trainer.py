@@ -607,7 +607,23 @@ class ClassifierDenseNet(nn.Module):
         x = self.act(x)
         return x
         
-    
+
+class ClassifierSqueezeNet(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()   
+        self.conv1 = nn.LazyConv2d(kernel_size=1, out_channel=num_classes)
+        self.globalavgpool = nn.AdaptiveAvgPool2d(output_size=1)
+        self.act = nn.Softmax()
+        
+        
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.globalavgpool(x)
+        x = self.act(x)
+        return x
+        
+        
+        
 def init_he(m):
     if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
         nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
