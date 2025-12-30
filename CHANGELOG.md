@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.23.0 (2025-12-30)
+
+### Feature
+
+* feat: add squeezenet task module ([`f22f648`](https://github.com/agbleze/mining_sites_detector/commit/f22f64863608c0c26fdfb96cfd6f03b3f2e52d76))
+
+### Style
+
+* style: remove unused imports ([`90f4460`](https://github.com/agbleze/mining_sites_detector/commit/90f44609e79c060c5b4e264932c1842288bde9dc))
+
 ## v0.22.2 (2025-12-28)
 
 ### Fix
