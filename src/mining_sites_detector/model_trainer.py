@@ -608,6 +608,26 @@ class ClassifierDenseNet(nn.Module):
         return x
         
 
+
+class SqueezeNetStem(nn.Module):
+    def __init__(self, out_channels):
+        super().__init__()
+        self.conv1 = nn.LazyConv2d(out_channels=out_channels,
+                                   kernel_size=7, stride=2,
+                                   padding="same",
+                                   )
+        self.act = nn.ReLU()
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
+        
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.act(x)
+        x = self.maxpool(x)
+        return x
+    
+    
+
+
 class ClassifierSqueezeNet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()   
