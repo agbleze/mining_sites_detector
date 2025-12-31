@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.24.0 (2025-12-31)
+
+### Feature
+
+* feat: add SqueezeNetStem ([`e18a363`](https://github.com/agbleze/mining_sites_detector/commit/e18a363ede4076b4596da54db643dd8ec2dcad50))
+
 ## v0.23.0 (2025-12-30)
 
 ### Feature
