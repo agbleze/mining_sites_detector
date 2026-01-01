@@ -614,7 +614,7 @@ class SqueezeNetStem(nn.Module):
         super().__init__()
         self.conv1 = nn.LazyConv2d(out_channels=out_channels,
                                    kernel_size=7, stride=2,
-                                   padding="same",
+                                   padding=3,
                                    )
         self.act = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
@@ -842,32 +842,33 @@ print("Output (first row):", y[0])
 import torch
 import torch.nn as nn
 
-# --- Stem module (corrected version) ---
-class SqueezeNetStem(nn.Module):
-    def __init__(self, out_channels):
-        super().__init__()
-        self.conv1 = nn.Conv2d(
-            in_channels=None,
-            out_channels=out_channels,
-            kernel_size=7,
-            stride=2,
-            padding=3
-        )
-        nn.init.xavier_uniform_(self.conv1.weight)
-        if self.conv1.bias is not None:
-            nn.init.zeros_(self.conv1.bias)
+# # --- Stem module (corrected version) ---
+# class SqueezeNetStem(nn.Module):
+#     def __init__(self, out_channels):
+#         super().__init__()
+#         self.conv1 = nn.Conv2d(
+#             in_channels=None,
+#             out_channels=out_channels,
+#             kernel_size=7,
+#             stride=2,
+#             padding=3
+#         )
+#         nn.init.xavier_uniform_(self.conv1.weight)
+#         if self.conv1.bias is not None:
+#             nn.init.zeros_(self.conv1.bias)
 
-        self.act = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
+#         self.act = nn.ReLU(inplace=True)
+#         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
 
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.act(x)
-        x = self.maxpool(x)
-        return x
+#     def forward(self, x):
+#         x = self.conv1(x)
+#         x = self.act(x)
+#         x = self.maxpool(x)
+#         return x
 
-# --- Test ---
+#%% --- Test ---
 if __name__ == "__main__":
+    #%%
     model = SqueezeNetStem(out_channels=96)
 
     # Fake input: batch=1, channels=3, height=224, width=224
