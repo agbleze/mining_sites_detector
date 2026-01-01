@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.25.1 (2026-01-01)
+
+### Fix
+
+* fix: change padding to 3 ([`f247004`](https://github.com/agbleze/mining_sites_detector/commit/f247004d89fbe8bb0e9640fad8ed8252a777770a))
+
 ## v0.25.0 (2026-01-01)
 
 ### Feature
