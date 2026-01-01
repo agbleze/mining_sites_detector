@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.25.0 (2026-01-01)
+
+### Feature
+
+* feat: change init_he to kernel_initializer ([`0fa2ece`](https://github.com/agbleze/mining_sites_detector/commit/0fa2ecef1ece0a3eabfe12ae761117de42073eb6))
+
 ## v0.24.0 (2025-12-31)
 
 ### Feature
