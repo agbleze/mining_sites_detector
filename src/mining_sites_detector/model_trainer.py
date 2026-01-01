@@ -341,7 +341,7 @@ class IdentityBlock(nn.Module):
         
         # conv_layers = [self.conv1, self.conv2, self.conv3]
         # for conv_layer in conv_layers:
-        #     init_he(conv_layer)
+        #     kernel_initializer(conv_layer)
             
     def forward(self, x):
         shortcut = x
@@ -412,7 +412,7 @@ class ProjectionBlock(nn.Module):
         
         # conv_layers = [self.conv1, self.conv2, self.conv3, self.shortcut]
         # for conv_layer in conv_layers:
-        #     init_he(conv_layer)
+        #     kernel_initializer(conv_layer)
             
     def forward(self, x):
         shortcut = self.shortcut(x)
@@ -631,22 +631,27 @@ class SqueezeNetStem(nn.Module):
 class ClassifierSqueezeNet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()   
-        self.conv1 = nn.LazyConv2d(kernel_size=1, out_channel=num_classes)
+        self.conv1 = nn.LazyConv2d(kernel_size=1, out_channels=num_classes)
         self.globalavgpool = nn.AdaptiveAvgPool2d(output_size=1)
-        self.act = nn.Softmax()
+        self.relu = nn.ReLU()
+        self.act = nn.Softmax(dim=1)
         
         
     def forward(self, x):
         x = self.conv1(x)
+        x = self.relu(x)
         x = self.globalavgpool(x)
         x = self.act(x)
         return x
         
+
         
-        
-def init_he(m):
+def kernel_initializer(m, kernel_initializer="he_normal"):
     if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
-        nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
+        if kernel_initializer == "he_normal":
+            nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
+        elif kernel_initializer == "glorot_uniform":
+            nn.init.xavier_uniform_(m.weight)
         if m.bias is not None:
             nn.init.zeros_(m.bias)
             
@@ -693,7 +698,7 @@ def build_model(stem_type, num_classes, group_params,
         example_input = torch.randn(1, in_channels, 224, 224)
     
     _ = model(example_input)
-    model.apply(init_he)
+    model.apply(kernel_initializer)
     return model
 
 #%%
@@ -784,7 +789,7 @@ class Block(nn.Module):
         x = self.fc(x)
         return x
 
-def init_he(m):
+def kernel_initializer(m):
     if isinstance(m, (nn.LazyConv2d, nn.LazyLinear)):
         nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
         if m.bias is not None:
@@ -802,7 +807,7 @@ _ = model(dummy)
 print("After forward:", model.conv.weight.shape)
 
 # Now apply init
-model.apply(init_he)
+model.apply(kernel_initializer)
 
 # %%
 import torch
@@ -833,4 +838,44 @@ y = model(x)
 print("Input shape:", x.shape)
 print("Output shape:", y.shape)
 print("Output (first row):", y[0])
+# %%
+import torch
+import torch.nn as nn
+
+# --- Stem module (corrected version) ---
+class SqueezeNetStem(nn.Module):
+    def __init__(self, out_channels):
+        super().__init__()
+        self.conv1 = nn.Conv2d(
+            in_channels=None,
+            out_channels=out_channels,
+            kernel_size=7,
+            stride=2,
+            padding=3
+        )
+        nn.init.xavier_uniform_(self.conv1.weight)
+        if self.conv1.bias is not None:
+            nn.init.zeros_(self.conv1.bias)
+
+        self.act = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.act(x)
+        x = self.maxpool(x)
+        return x
+
+# --- Test ---
+if __name__ == "__main__":
+    model = SqueezeNetStem(out_channels=96)
+
+    # Fake input: batch=1, channels=3, height=224, width=224
+    x = torch.randn(1, 3, 224, 224)
+
+    y = model(x)
+
+    print("Input shape :", x.shape)
+    print("Output shape:", y.shape)
+
 # %%
