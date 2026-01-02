@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.25.2 (2026-01-02)
+
+### Fix
+
+* fix: update Xception_stem ([`09d723b`](https://github.com/agbleze/mining_sites_detector/commit/09d723b38803810c7d1c08528278d1b49b3a7c46))
+
 ## v0.25.1 (2026-01-01)
 
 ### Fix
