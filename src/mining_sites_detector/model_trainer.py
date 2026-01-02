@@ -274,7 +274,7 @@ class Resnet_stem(nn.Module):
 
 class Xception_stem(nn.Module):
     def __init__(self, in_channel):
-        super(Xception_stem).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(in_channels=in_channel, out_channels=32, strides=2, kernel_size=3)
         self.bn1 = nn.BatchNorm2d(num_features=32)
         self.act = nn.ReLU()
