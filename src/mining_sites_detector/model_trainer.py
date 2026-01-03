@@ -656,6 +656,12 @@ class NaiveInceptionModule(nn.Module):
         
     def forward(self, x):
         x1 = self.maxpool(x)
+        x2 = self.act(self.conv1(x))
+        x3 = self.act(self.conv2(x))
+        x4 = self.act(self.conv3(x))
+        output = torch.cat([x1, x2, x3, x4], dim=1)
+        return output
+        
         
             
     
