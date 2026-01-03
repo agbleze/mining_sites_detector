@@ -645,7 +645,21 @@ class ClassifierSqueezeNet(nn.Module):
         return x
         
 
+class NaiveInceptionModule(nn.Module):
+    def __init__(self,):
+        super().__init__()
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding="same")
+        self.conv1 = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
+        self.conv2 = nn.LazyConv2d(out_channels=96, stride=1, kernel_size=3, padding="same")
+        self.conv3 = nn.LazyConv2d(out_channels=48, stride=1, kernel_size=5, padding="same")
+        self.act = nn.ReLU()
         
+    def forward(self, x):
+        x1 = self.maxpool(x)
+        
+            
+    
+           
 def kernel_initializer(m, kernel_initializer="he_normal"):
     if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
         if kernel_initializer == "he_normal":
