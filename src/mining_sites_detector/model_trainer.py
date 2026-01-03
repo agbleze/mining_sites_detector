@@ -663,6 +663,35 @@ class NaiveInceptionModule(nn.Module):
         return output
         
         
+class Inception1Module(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding="same")
+        self.conv1x1_a = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
+        self.conv1x1_b = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
+        self.conv1x1_c = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
+        self.conv3x3 = nn.LazyConv2d(out_channels=96, kernel_size=3, stride=1, padding="same")
+        self.conv1x1_d = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
+        self.conv5x5 = nn.LazyConv2d(out_channels=48, kernel_size=5, stride=1, padding="same")
+        self.act = nn.ReLU()
+        
+    def forward(self, x):
+        x1 = self.maxpool(x)
+        x1 = self.act(self.conv1x1_a(x1))
+
+        x2 = self.act(self.conv1x1_b(x))
+
+        x3 = self.act(self.conv1x1_c(x))
+        x3 = self.act(self.conv3x3(x3))
+
+        x4 = self.act(self.conv1x1_d(x))
+        x4 = self.act(self.conv5x5(x4))
+        
+        output = torch.cat([x1, x2, x3, x4], dim=1)
+        return output
+        
+        
+        
             
     
            
