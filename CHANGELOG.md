@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.26.0 (2026-01-03)
+
+### Feature
+
+* feat: add NaiveInceptionModule ([`b9ea65a`](https://github.com/agbleze/mining_sites_detector/commit/b9ea65a07e517d63a0de486bb1fd63a0b24e9603))
+
 ## v0.25.2 (2026-01-02)
 
 ### Fix
