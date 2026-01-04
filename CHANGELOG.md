@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.27.0 (2026-01-04)
+
+### Feature
+
+* feat: add Inception1Module ([`b08001f`](https://github.com/agbleze/mining_sites_detector/commit/b08001f237ee4f070ffc4ca1274c63c9ce1a57a8))
+
+* feat: update NaiveInceptionModule ([`73de0b8`](https://github.com/agbleze/mining_sites_detector/commit/73de0b84bed54e786fd93dfb8ccb36a66b145942))
+
 ## v0.26.0 (2026-01-03)
 
 ### Feature
