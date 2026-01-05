@@ -692,7 +692,11 @@ class Inception1Module(nn.Module):
         
         
         
-            
+class InceptionStem(nn.Module):
+    def __init__(self, out_channels):
+        super().__init__()
+        self.zeropad = nn.ZeroPad2d(padding=3)   
+        self.conv1_7x7 = nn.LazyConv2d(out_channels=64, stride=2, kernel_size=7)       
     
            
 def kernel_initializer(m, kernel_initializer="he_normal"):
