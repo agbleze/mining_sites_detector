@@ -696,7 +696,24 @@ class InceptionStem(nn.Module):
     def __init__(self, out_channels):
         super().__init__()
         self.zeropad = nn.ZeroPad2d(padding=3)   
-        self.conv1_7x7 = nn.LazyConv2d(out_channels=64, stride=2, kernel_size=7)       
+        self.conv1_7x7 = nn.LazyConv2d(out_channels=64, stride=2, kernel_size=7) 
+        self.maxpool = nn.MaxPool2d(kernel_size=3)
+        self.conv2_1x1 = nn.LazyConv2d(out_channels=64, kernel_size=1, stride=1)
+        self.conv3_3x3 = nn.LazyConv2d(out_channels=192, kernel_size=3, stride=2)
+        
+        
+    def forward(self, x):
+        x = self.zeropad(x)
+        x = self.conv1_7x7(x)
+        x = self.zeropad(x)
+        x = self.maxpool(x)
+        
+        x = self.conv2_1x1(x)
+        x = self.conv3_3x3(x)
+        x = self.zeropad(x)
+        x = self.maxpool(x)
+        return x
+              
     
            
 def kernel_initializer(m, kernel_initializer="he_normal"):
