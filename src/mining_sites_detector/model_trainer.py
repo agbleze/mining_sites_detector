@@ -696,21 +696,26 @@ class InceptionStem(nn.Module):
     def __init__(self, out_channels):
         super().__init__()
         self.zeropad = nn.ZeroPad2d(padding=3)   
-        self.conv1_7x7 = nn.LazyConv2d(out_channels=64, stride=2, kernel_size=7) 
-        self.maxpool = nn.MaxPool2d(kernel_size=3)
-        self.conv2_1x1 = nn.LazyConv2d(out_channels=64, kernel_size=1, stride=1)
-        self.conv3_3x3 = nn.LazyConv2d(out_channels=192, kernel_size=3, stride=2)
-        
+        self.conv1_7x7 = nn.LazyConv2d(out_channels=64, stride=2, kernel_size=7, padding="valid") 
+        self.act = nn.ReLU()
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.conv2_1x1 = nn.LazyConv2d(out_channels=64, kernel_size=1, stride=1, padding="same")
+        self.conv3_3x3 = nn.LazyConv2d(out_channels=192, kernel_size=3, stride=1, padding="valid")
+     
+    def zeropad(self, padding):
+        return nn.ZeroPad2d(padding=padding)
         
     def forward(self, x):
-        x = self.zeropad(x)
-        x = self.conv1_7x7(x)
-        x = self.zeropad(x)
+        x = self.zeropad(padding=3)(x)
+        x = self.act(self.conv1_7x7(x))
+        x = self.zeropad(padding=1)(x)
         x = self.maxpool(x)
         
-        x = self.conv2_1x1(x)
-        x = self.conv3_3x3(x)
-        x = self.zeropad(x)
+        x = self.act(self.conv2_1x1(x))
+        x = self.zeropad(padding=1)(x)
+        x = self.act(self.conv3_3x3(x))
+        
+        x = self.zeropad(padding=1)(x)
         x = self.maxpool(x)
         return x
               
