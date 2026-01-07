@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.28.2 (2026-01-07)
+
+### Fix
+
+* fix: update InceptionStem ([`768ca7a`](https://github.com/agbleze/mining_sites_detector/commit/768ca7a2eaf48804055344defdb44863479284db))
+
 ## v0.28.1 (2026-01-06)
 
 ### Fix
