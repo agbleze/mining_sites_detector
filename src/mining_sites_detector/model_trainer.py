@@ -761,8 +761,29 @@ class InceptionBlock(nn.Module):
         return output
             
         
+class InceptionAuxiliaryClassifier(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
         
+        #self.pool = nn.AdaptiveAvgPool2d(output_size=1)
+        self.pool = nn.AvgPool2d(kernel_size=5, stride=3)
+        self.conv_1x1 = nn.LazyConv2d(out_channels=128, kernel_size=1, stride=1, padding=1)
+        self.fc1 = nn.LazyLinear(out_features=1024)
+        self.fc2 = nn.LazyLinear(out_features=num_classes) 
+        self.act = nn.ReLU()   
+        self.softmax = nn.Softmax(dim=1)
         
+    def forward(self, x):
+        x = self.pool(x)
+        x = self.act(self.conv_1x1(x))
+        x = torch.flatten(x, dims=1)
+        x = self.act(self.fc1(x))
+        x = nn.Dropout(0.7)(x)
+        x = self.fc2(x)
+        x = self.softmax(x)
+        return x
+       
+    
         
              
 def kernel_initializer(m, kernel_initializer="he_normal"):
