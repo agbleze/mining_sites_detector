@@ -719,7 +719,52 @@ class InceptionStem(nn.Module):
         return x
               
     
+class InceptionBlock(nn.Module):
+    def __init__(self, f1x1, f3x3, f5x5, fpool):
+        super().__init__()
+        
+        self.act = nn.ReLU()
+        self.zeropad = nn.ZeroPad2d(padding=1)
+        
+        self.b1x1 = nn.LazyConv2d(out_channels=f1x1[0], kernel_size=1, padding="same")
            
+        self.b3x3_1 = nn.LazyConv2d(out_channels=f3x3[0], kernel_size=1, stride=1, padding="same")
+        self.b3x3_2 = nn.LazyConv2d(out_channels=f3x3[1], kernel_size=3, stride=1, padding="valid")
+        
+        self.b5x5_1 = nn.LazyConv2d(out_channels=f5x5[0], kernel_size=1, padding="same")
+        self.b5x5_2 = nn.LazyConv2d(out_channels=f5x5[1], kernel_size=3, stride=1, padding="valid")
+        
+        self.bpool = nn.MaxPool2d(kernel_size=3, stride=1, padding="same")
+        self.bpool_conv1x1 = nn.LazyConv2d(out_channels=fpool[0], kernel_size=1, padding="same")
+        
+    def forward(self, x):
+        # 1x1 branch
+        x_b1xb1 = self.act(self.b1x1(x))
+        
+        # 3 x 3 branch
+        # 1 x 1 reduction
+        x_b3xb3 = self.act(self.b3x3_1(x))
+        x_b3xb3 = self.zeropad(x_b3xb3)
+        x_b3xb3 = self.act(self.b3x3_2(x_b3xb3))
+        
+        # 5 x 5 branch
+        # 1 x 1 reduction
+        x_b5x5 = self.act(self.b5x5_1(x))
+        x_b5x5 = self.zeropad(x_b5x5)
+        x_b5x5 = self.act(self.b5x5_2(x_b5x5))
+        
+        # pooling branch
+        x_bpool = self.bpool(x)
+        x_bpool = self.act(self.bpool_conv1x1(x_bpool))
+        
+        output = torch.cat([x_b1xb1, x_b3xb3, x_b5x5, x_bpool], dim=1)
+        return output
+            
+        
+        
+        
+        
+             
 def kernel_initializer(m, kernel_initializer="he_normal"):
     if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
         if kernel_initializer == "he_normal":
