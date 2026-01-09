@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.31.0 (2026-01-09)
+
+### Feature
+
+* feat: add InceptionClassifier ([`7490d5d`](https://github.com/agbleze/mining_sites_detector/commit/7490d5d07d4a653f49cac687e308cd9659c7cf79))
+
+### Style
+
+* style: remove commented-out code ([`97da27e`](https://github.com/agbleze/mining_sites_detector/commit/97da27ea3129bd695a5b388f5c992d28d5fa411e))
+
 ## v0.30.0 (2026-01-09)
 
 ### Feature
