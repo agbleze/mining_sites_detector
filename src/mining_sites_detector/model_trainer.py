@@ -784,8 +784,22 @@ class InceptionAuxiliaryClassifier(nn.Module):
        
 
 class InceptionClassifier(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, dropout=0.4):
         super().__init__()
+        self.dropout_rate = dropout
+        self.pool = nn.AdaptiveAvgPool2d(output_size=1)
+        self.fc = nn.LazyLinear(out_features=num_classes)
+        self.softmax = nn.Softmax(dim=1)
+    
+    def forward(self, x):
+        x = self.pool(x)
+        x = torch.flatten(x, dims=1)
+        x = nn.Dropout(p=self.dropout_rate)(x)
+        
+        # final dense layer
+        x = self.fc(x)
+        x = self.softmax(x)
+        return x
         
            
         
