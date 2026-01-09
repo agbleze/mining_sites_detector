@@ -765,7 +765,6 @@ class InceptionAuxiliaryClassifier(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         
-        #self.pool = nn.AdaptiveAvgPool2d(output_size=1)
         self.pool = nn.AvgPool2d(kernel_size=5, stride=3)
         self.conv_1x1 = nn.LazyConv2d(out_channels=128, kernel_size=1, stride=1, padding=1)
         self.fc1 = nn.LazyLinear(out_features=1024)
@@ -783,7 +782,12 @@ class InceptionAuxiliaryClassifier(nn.Module):
         x = self.softmax(x)
         return x
        
-    
+
+class InceptionClassifier(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        
+           
         
              
 def kernel_initializer(m, kernel_initializer="he_normal"):
