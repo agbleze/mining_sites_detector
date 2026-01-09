@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.29.0 (2026-01-09)
+
+### Feature
+
+* feat: add InceptionBlock ([`4c5de91`](https://github.com/agbleze/mining_sites_detector/commit/4c5de91d82b546f53b243cd1d3a5352c239c5bc6))
+
+### Style
+
+* style: remove comment ([`8ef8070`](https://github.com/agbleze/mining_sites_detector/commit/8ef8070acd102982df6387f1356dc12556800546))
+
 ## v0.28.2 (2026-01-07)
 
 ### Fix
