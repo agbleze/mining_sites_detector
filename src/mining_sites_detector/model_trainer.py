@@ -592,6 +592,80 @@ def learner_densenet(groups, n_filters, reduction):
     return nn.Sequential(**group_collection)
 
 
+def group_inception_v1(#x, 
+                       blocks, pooling=True, n_classes=1000):
+    """
+    Docstring for group_inception
+    
+    :param x: inputs
+    :param blocks: filters configuration for each inception block in the group
+    :param pooling: whether to apply maxpooling at end of the group
+    :param n_classes: number of classes for auxiliary classifier
+    """
+    
+    aux = []
+    incepblk = []
+    
+    for block in blocks:
+        if block is None:
+            aux.append(InceptionAuxiliaryClassifier(#x, 
+                                                    n_classes=n_classes))
+        else:
+            #x = InceptionBlock(x, block[0], block[1], block[2], block[3])
+            incepblk.append(InceptionBlock(block[0], block[1], block[2], block[3]))
+            
+    if pooling:
+        #x = nn.ZeroPad2d(padding=1)(x)
+        #x = nn.MaxPool2d(kernel_size=3, stride=2)(x)
+        incepblk.append(nn.ZeroPad2d(padding=1))
+        incepblk.append(nn.MaxPool2d(kernel_size=3, stride=2))
+    #return x, aux
+    return incepblk, aux
+
+
+
+def learner_inception_v1(x, n_classes, group_params):
+    """
+    Docstring for learner_inception_v1
+    
+    :param x: inputs
+    :param n_classes: number of classes
+    :param group_params: list of group parameters
+    """
+    
+    group3_param = [((64,),  (96,128),   (16, 32), (32,)),  # 3a
+                     ((128,), (128, 192), (32, 96), (64,)) # 3b
+                     ]
+    
+    group4_param = [((192,),  (96, 208), (16, 48), (64,)), # 4a
+                     None, 				 # auxiliary classifier
+                     ((160,), (112, 224), (24, 64), (64,)), # 4b
+                     ((128,), (128, 256), (24, 64), (64,)), # 4c
+                     ((112,), (144, 288), (32, 64), (64,)), # 4d
+                     None,                                  # auxiliary classifier
+                     ((256,), (160, 320), (32, 128), (128,)) # 4e
+                     ] 
+    
+    group5_param = [((256,), (160, 320), (32, 128), (128,)), # 5a
+                     ((384,), (192, 384), (48, 128), (128,))
+                    ]# 5b
+    
+    
+    aux = []
+    x, o = group_inception_v1(#x,
+                              group3_param)
+    aux += o
+    
+    x, o = group_inception_v1(#x, 
+                              group4_param, n_classes=n_classes)
+    aux += o
+    
+    x, o = group_inception_v1(#x, 
+                              group5_param, pooling=False)
+    aux += o
+    return x, aux    
+    
+    
 class ClassifierDenseNet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
@@ -825,6 +899,8 @@ def get_stem_module(stem_type, in_channels=None, out_channels=64):
         return Xception_stem(in_channel=in_channels)
     elif stem_type == "densenet":
         return StemDenseNet(out_channels=out_channels)
+    elif stem_type == "inception_v1":
+        return InceptionStem(out_channels=out_channels)
     else:
         raise ValueError(f"Unsupported stem type: {stem_type}")
     
@@ -848,6 +924,12 @@ def build_model(stem_type, num_classes, group_params,
                                           reduction=reduction
                                           )
         task_module = ClassifierDenseNet(num_classes=num_classes)
+    elif stem_type == "inception_v1":
+        learner_module, aux_classifiers = learner_inception_v1(x=None,
+                                                                n_classes=num_classes,
+                                                                group_params=group_params
+                                                                )
+        task_module = InceptionClassifier(num_classes=num_classes)
 
     model = nn.Sequential(stem_module, learner_module,task_module)
     if example_input is None:
