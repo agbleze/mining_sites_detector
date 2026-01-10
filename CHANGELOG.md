@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.32.0 (2026-01-10)
+
+### Feature
+
+* feat: add learner_inception_v1 ([`f6f792c`](https://github.com/agbleze/mining_sites_detector/commit/f6f792c3516d4b5996d31e150a3fb67166ffac48))
+
 ## v0.31.0 (2026-01-09)
 
 ### Feature
