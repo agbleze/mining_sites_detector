@@ -11,7 +11,7 @@ from models.utils import kernel_initializer
 class NaiveInceptionModule(nn.Module):
     def __init__(self,):
         super().__init__()
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding="same")
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
         self.conv1 = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
         self.conv2 = nn.LazyConv2d(out_channels=96, stride=1, kernel_size=3, padding="same")
         self.conv3 = nn.LazyConv2d(out_channels=48, stride=1, kernel_size=5, padding="same")
@@ -29,7 +29,7 @@ class NaiveInceptionModule(nn.Module):
 class Inception1Module(nn.Module):
     def __init__(self):
         super().__init__()
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding="same")
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
         self.conv1x1_a = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
         self.conv1x1_b = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
         self.conv1x1_c = nn.LazyConv2d(out_channels=64, stride=1, kernel_size=1, padding="same")
@@ -98,7 +98,7 @@ class InceptionBlock(nn.Module):
         self.b5x5_1 = nn.LazyConv2d(out_channels=f5x5[0], kernel_size=1, padding="same")
         self.b5x5_2 = nn.LazyConv2d(out_channels=f5x5[1], kernel_size=3, stride=1, padding="valid")
         
-        self.bpool = nn.MaxPool2d(kernel_size=3, stride=1, padding="same")
+        self.bpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
         self.bpool_conv1x1 = nn.LazyConv2d(out_channels=fpool[0], kernel_size=1, padding="same")
         
     def forward(self, x):
@@ -129,19 +129,20 @@ class InceptionAuxiliaryClassifier(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         
-        self.pool = nn.AvgPool2d(kernel_size=5, stride=3)
+        self.pool = nn.AvgPool2d(kernel_size=5) #, stride=3)
         self.conv_1x1 = nn.LazyConv2d(out_channels=128, kernel_size=1, stride=1, padding=1)
         self.fc1 = nn.LazyLinear(out_features=1024)
         self.fc2 = nn.LazyLinear(out_features=num_classes) 
         self.act = nn.ReLU()   
         self.softmax = nn.Softmax(dim=1)
+        self.dropout = nn.Dropout(0.7)
         
     def forward(self, x):
         x = self.pool(x)
         x = self.act(self.conv_1x1(x))
-        x = torch.flatten(x, dims=1)
+        x = x.flatten(1) #torch.flatten(x, dims=1)
         x = self.act(self.fc1(x))
-        x = nn.Dropout(0.7)(x)
+        x = self.dropout(x)
         x = self.fc2(x)
         x = self.softmax(x)
         return x
@@ -154,11 +155,12 @@ class InceptionClassifier(nn.Module):
         self.pool = nn.AdaptiveAvgPool2d(output_size=1)
         self.fc = nn.LazyLinear(out_features=num_classes)
         self.softmax = nn.Softmax(dim=1)
+        self.dropout = nn.Dropout(p=self.dropout_rate)
     
     def forward(self, x):
         x = self.pool(x)
         x = torch.flatten(x, dims=1)
-        x = nn.Dropout(p=self.dropout_rate)(x)
+        x = self.dropout(x)
         
         # final dense layer
         x = self.fc(x)
@@ -344,7 +346,7 @@ def group_auxiliary_classifiers(num_classes, group_pos=[2,3]):
     return aux_blocks
       
 
-def create_learner_inception_groups(group_configs=[{}]):
+def create_learner_inception_groups(group_configs):
     learner_grps = []
     
     for grp_config in group_configs:
