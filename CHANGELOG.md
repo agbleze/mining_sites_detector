@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.33.1 (2026-01-11)
+
+### Fix
+
+* fix: remove dropout creation in forward ([`ff26853`](https://github.com/agbleze/mining_sites_detector/commit/ff26853c229b7c793e7ed102ba951c622055f4f7))
+
 ## v0.33.0 (2026-01-11)
 
 ### Feature
