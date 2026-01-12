@@ -400,8 +400,6 @@ if __name__ == "__main__":
                                       )
     
     model = nn.Sequential(stem, learner_aux_task)
-    #if example_input is None:
-    #    if not in_channels:
     in_channels = 3
     example_input = torch.randn(1, in_channels, 224, 224)
     
@@ -409,7 +407,6 @@ if __name__ == "__main__":
     model.apply(kernel_initializer)
     
     
-    #LearnerInception_v1(group_params=group_params, num_classes=5)
 
 
 
