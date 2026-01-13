@@ -129,7 +129,7 @@ class InceptionAuxiliaryClassifier(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         
-        self.pool = nn.AvgPool2d(kernel_size=5) #, stride=3)
+        self.pool = nn.AvgPool2d(kernel_size=5)
         self.conv_1x1 = nn.LazyConv2d(out_channels=128, kernel_size=1, stride=1, padding=1)
         self.fc1 = nn.LazyLinear(out_features=1024)
         self.fc2 = nn.LazyLinear(out_features=num_classes) 
@@ -140,7 +140,7 @@ class InceptionAuxiliaryClassifier(nn.Module):
     def forward(self, x):
         x = self.pool(x)
         x = self.act(self.conv_1x1(x))
-        x = x.flatten(1) #torch.flatten(x, dims=1)
+        x =  torch.flatten(x, start_dim=1)
         x = self.act(self.fc1(x))
         x = self.dropout(x)
         x = self.fc2(x)
@@ -159,7 +159,7 @@ class InceptionClassifier(nn.Module):
     
     def forward(self, x):
         x = self.pool(x)
-        x = torch.flatten(x, dims=1)
+        x = torch.flatten(x, start_dim=1)
         x = self.dropout(x)
         
         # final dense layer
@@ -391,7 +391,7 @@ if __name__ == "__main__":
     
     
     learner_modules = create_learner_inception_groups(group_configs=group_configs)
-    aux_classifiers = group_auxiliary_classifiers(num_classes=5, group_pos=[2,3])
+    aux_classifiers = group_auxiliary_classifiers(num_classes=5, group_pos=[1,2])
     classifier = InceptionClassifier(num_classes=5)
     
     stem = InceptionStem()
