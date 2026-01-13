@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.33.2 (2026-01-13)
+
+### Fix
+
+* fix: change flatten of input ([`af5fe04`](https://github.com/agbleze/mining_sites_detector/commit/af5fe04b07502aea8f248628513a51f6f3436b8a))
+
+### Style
+
+* style: remove commented code ([`68227b9`](https://github.com/agbleze/mining_sites_detector/commit/68227b94bc5d8c79d9efb8d83e16a07b5b18bb8f))
+
 ## v0.33.1 (2026-01-11)
 
 ### Fix
