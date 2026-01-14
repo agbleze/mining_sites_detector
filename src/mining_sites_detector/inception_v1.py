@@ -89,6 +89,7 @@ class InceptionBlock(nn.Module):
         
         self.act = nn.ReLU()
         self.zeropad = nn.ZeroPad2d(padding=1)
+        self.zeropad2 = nn.ZeroPad2d(padding=2)
         
         self.b1x1 = nn.LazyConv2d(out_channels=f1x1[0], kernel_size=1, padding="same")
            
@@ -96,7 +97,7 @@ class InceptionBlock(nn.Module):
         self.b3x3_2 = nn.LazyConv2d(out_channels=f3x3[1], kernel_size=3, stride=1, padding="valid")
         
         self.b5x5_1 = nn.LazyConv2d(out_channels=f5x5[0], kernel_size=1, padding="same")
-        self.b5x5_2 = nn.LazyConv2d(out_channels=f5x5[1], kernel_size=3, stride=1, padding="valid")
+        self.b5x5_2 = nn.LazyConv2d(out_channels=f5x5[1], kernel_size=5, stride=1, padding="valid")
         
         self.bpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
         self.bpool_conv1x1 = nn.LazyConv2d(out_channels=fpool[0], kernel_size=1, padding="same")
@@ -114,7 +115,7 @@ class InceptionBlock(nn.Module):
         # 5 x 5 branch
         # 1 x 1 reduction
         x_b5x5 = self.act(self.b5x5_1(x))
-        x_b5x5 = self.zeropad(x_b5x5)
+        x_b5x5 = self.zeropad2(x_b5x5)
         x_b5x5 = self.act(self.b5x5_2(x_b5x5))
         
         # pooling branch
