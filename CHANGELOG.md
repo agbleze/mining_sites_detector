@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.34.0 (2026-01-14)
+
+### Feature
+
+* feat: add inceptionV2Block ([`4121d46`](https://github.com/agbleze/mining_sites_detector/commit/4121d46d91e45193a3d7e9d5eee750a7bc2fff00))
+
 ## v0.33.3 (2026-01-14)
 
 ### Fix
