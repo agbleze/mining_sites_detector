@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.33.3 (2026-01-14)
+
+### Fix
+
+* fix: change kernel=3 to kernel=5 in b5x5_2 ([`784f9b1`](https://github.com/agbleze/mining_sites_detector/commit/784f9b19bdf4edde32ec5405ffcc4af07f077b75))
+
 ## v0.33.2 (2026-01-13)
 
 ### Fix
