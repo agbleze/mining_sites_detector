@@ -1,8 +1,17 @@
 # CHANGELOG
 
+## v0.34.2 (2026-01-16)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+update ([`7929dd3`](https://github.com/agbleze/mining_sites_detector/commit/7929dd31d9bcb18e9fede8f20c47d672603e5c42))
+
 ## v0.34.1 (2026-01-15)
 
 ### Fix
+
+* fix: update inceptionV2Block with convolutions ([`9e2216c`](https://github.com/agbleze/mining_sites_detector/commit/9e2216ccdb50af8aed897731160d1262747a4cb6))
 
 * fix: update inceptionV2Block ([`c3b1e26`](https://github.com/agbleze/mining_sites_detector/commit/c3b1e26ee6634b65004dcb5fccd86300c5255022))
 
