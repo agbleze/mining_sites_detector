@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.35.0 (2026-01-17)
+
+### Feature
+
+* feat: create inception_v3 ([`5b9f73d`](https://github.com/agbleze/mining_sites_detector/commit/5b9f73da6eaef2901ede2ac86e7cd04d214f59ef))
+
 ## v0.34.2 (2026-01-16)
 
 ### Unknown
