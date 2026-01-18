@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.36.0 (2026-01-18)
+
+### Feature
+
+* feat: add InceptionV3Inception ([`ccf020f`](https://github.com/agbleze/mining_sites_detector/commit/ccf020fc49cc564a0f9d7373a565993fd9de1a27))
+
 ## v0.35.0 (2026-01-17)
 
 ### Feature
