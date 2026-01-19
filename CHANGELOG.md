@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.36.1 (2026-01-19)
+
+### Fix
+
+* fix: update convolution branch ([`c984f42`](https://github.com/agbleze/mining_sites_detector/commit/c984f423d816415aa2344df5fe5177d8baf39885))
+
 ## v0.36.0 (2026-01-18)
 
 ### Feature
