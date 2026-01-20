@@ -68,4 +68,39 @@ class inceptionV2Block(nn.Module):
 
 
 
+class InceptionV2Stem(nn.Module):
+    def __init__(self,):
+        super().__init__()
+        
+        self.conv_a = nn.LazyConv2d(out_channels=64, kernel_size=7, stride=2, padding="valid", bias=False)
+        self.bn = nn.BatchNorm2d()
+        self.act = nn.ReLU()
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
 
+        self.conv_b = nn.LazyConv2d(out_channels=64, kernel_size=1, padding="same", bias=False)
+        self.conv_c = nn.LazyConv2d(out_channels=192, kernel_size=3, stride=1, padding="valid", bias=False)
+    
+    def zeropad(self, padding):
+        return nn.ZeroPad2d(padding)
+    
+    def forward(self, x):
+        x = self.zeropad(3)(x)
+        
+        x = self.conv_a(x)
+        x = self.bn(x)
+        x = self.act(x)
+        
+        x = self.zeropad(1)(x)
+        x = self.maxpool(x)
+        
+        x = self.conv_b(x)
+        x = self.bn(x)
+        x = self.act(x)
+        x = self.zeropad(1)(x)
+        x = self.conv_c(x)
+        x = self.bn(x)
+        x = self.act(x)
+        
+        x = self.zeropad(1)(x)
+        x = self.maxpool(x)
+        return x
