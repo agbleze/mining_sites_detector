@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.37.0 (2026-01-20)
+
+### Feature
+
+* feat: add InceptionV2Stem ([`42794e1`](https://github.com/agbleze/mining_sites_detector/commit/42794e166f0d61d1ceca89c3bce1a3c4b3b604d6))
+
 ## v0.36.1 (2026-01-19)
 
 ### Fix
