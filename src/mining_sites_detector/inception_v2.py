@@ -104,3 +104,21 @@ class InceptionV2Stem(nn.Module):
         x = self.zeropad(1)(x)
         x = self.maxpool(x)
         return x
+
+
+
+class InceptionV2Classifier(nn.Module):
+    def __init__(self, num_classes, dropout_rate=0.4):
+        super().__init__()
+        
+        self.avgpool = nn.AvgPool2d(kernel_size=7, stride=1)
+        self.dropout = nn.Dropout(dropout_rate)
+        self.fc = nn.LazyLinear(out_features=num_classes)
+        
+        
+    def forward(self, x):
+        x = self.avgpool(x)
+        x = torch.flatten(x)
+        x = self.dropout(x)
+        x = self.fc(x)
+        return x
