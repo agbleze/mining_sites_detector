@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.38.0 (2026-01-21)
+
+### Feature
+
+* feat: add InceptionV2Classifier ([`941df9f`](https://github.com/agbleze/mining_sites_detector/commit/941df9fa8aff0b2fc4fa790609fbb586d5dcc381))
+
 ## v0.37.0 (2026-01-20)
 
 ### Feature
