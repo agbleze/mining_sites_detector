@@ -122,3 +122,31 @@ class InceptionV2Classifier(nn.Module):
         x = self.dropout(x)
         x = self.fc(x)
         return x
+    
+    
+    
+class   InceptionV2AuxilliaryClassifier(nn.Module):
+    def __init__(self, x, num_classes, dropout_rate=0.7):
+        super().__init__()
+        
+        self.avgpool = nn.AvgPool2d(kernel_size=5, stride=3)
+        self.conv = nn.LazyConv2d(out_channels=128, kernel_size=1, stride=1, padding="same", bias=False)
+        self.bn = nn.BatchNorm2d()
+        self.act = nn.ReLU()
+        self.fc1 = nn.LazyLinear(out_features=1024)
+        self.dropout = nn.Dropout(dropout_rate)
+        self.fc2 = nn.LazyLinear(out_features=num_classes)
+        self.softmax = nn.Softmax(dim=1)
+        
+    def forward(self, x):
+        x = self.avgpool(x)
+        x =self.conv(x)
+        x = self.bn(x)
+        x = self.act(x)
+        
+        x = torch.flatten(x)
+        x = self.fc1(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        x = self.softmax(x)
+        return x
