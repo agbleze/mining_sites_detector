@@ -55,9 +55,13 @@ class InceptionV3Stem(nn.Module):
 
 
 
-class InceptionV3Inception(nn.Module):
-    def __init__(self, ):
+class InceptionV3BlockA(nn.Module):
+    def __init__(self, f1x1, f3x3, f5x5, fpool):
         super().__init__()
         
+        self.act = nn.ReLU()
+        self.zeropad1 = nn.ZeroPad2d(1)
+        self.zeropad2 = nn.ZeroPad2d(2)
         
+        self.f1x1_conv = nn.LazyConv2d(out_channels=f1x1[0], kernel_size=1, stride=1, padding="same", bias=False)
     
