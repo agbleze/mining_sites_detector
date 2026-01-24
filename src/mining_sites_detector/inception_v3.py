@@ -62,6 +62,9 @@ class InceptionV3BlockA(nn.Module):
         self.act = nn.ReLU()
         self.zeropad1 = nn.ZeroPad2d(1)
         self.zeropad2 = nn.ZeroPad2d(2)
+        self.bn = nn.BatchNorm2d()
         
         self.f1x1_conv = nn.LazyConv2d(out_channels=f1x1[0], kernel_size=1, stride=1, padding="same", bias=False)
+        self.f3x3_conv1x1 = nn.LazyConv2d(out_channels=f3x3[0], kernel_size=1, padding="same", stride=1, bias=False)
+        
     
