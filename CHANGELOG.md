@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.40.2 (2026-01-25)
+
+### Fix
+
+* fix: add forward method ([`19f6bc1`](https://github.com/agbleze/mining_sites_detector/commit/19f6bc1583303dac2d50452fe437fc4892f8a0c8))
+
 ## v0.40.1 (2026-01-24)
 
 ### Fix
