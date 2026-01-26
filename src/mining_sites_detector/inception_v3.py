@@ -111,3 +111,6 @@ class InceptionV3BlockA(nn.Module):
         
         
     
+    
+class InceptionV3BlockB(nn.Module):
+    pass
