@@ -126,5 +126,13 @@ class InceptionV3BlockB(nn.Module):
         self.f1xn_conv1xn = nn.LazyConv2d(out_channels=f1xn[1], kernel_size=(1,7), stride=1, padding="same", bias=False)
         self.f1xn_convnx1 = nn.LazyConv2d(out_channels=f1xn[2], kernel_size=(7, 1), stride=1, padding="same", bias=False)
         
+        self.f1xndbl_conv1x1 = nn.LazyConv2d(out_channels=f1xndbl[0], kernel_size=1, stride=1, padding="same", bias=False)
+        self.f1xndbl_conv1xn_a = nn.LazyConv2d(out_channels=f1xndbl[1], kernel_size=(1,7), stride=1, padding="same", bias=False)
+        self.f1xndbl_convnx1_a = nn.LazyConv2d(out_channels=f1xndbl[2], kernel_size=(7, 1), stride=1, padding="same", bias=False)
+        self.f1xndbl_conv1xn_b = nn.LazyConv2d(out_channels=f1xndbl[3], kernel_size=(1,7), stride=1, padding="same", bias=False)
+        self.f1xndbl_convnx1_b = nn.LazyConv2d(out_channels=f1xndbl[4], kernel_size=(7, 1), stride=1, padding="same", bias=False) 
+        
+        self.pool_conv1x1 = nn.LazyConv2d(out_channels=fpool[0], kernel_size=1, stride=1, padding="same", bias=False)
+        
         
         
