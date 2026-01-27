@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.41.2 (2026-01-27)
+
+### Fix
+
+* fix: update InceptionV3BlockB with convolutions ([`c78d31c`](https://github.com/agbleze/mining_sites_detector/commit/c78d31cba65d47683f8301b00bdaef032a5ea737))
+
 ## v0.41.1 (2026-01-27)
 
 ### Fix
