@@ -113,4 +113,18 @@ class InceptionV3BlockA(nn.Module):
     
     
 class InceptionV3BlockB(nn.Module):
-    pass
+    def __init__(self, f1x1, f1xn, f1xndbl, fpool):
+        super().__init__()
+        
+        self.act = nn.ReLU()
+        self.avgpool = nn.AvgPool2d(kernel_size=3, stride=1, padding="same")
+        self.bn = nn.BatchNorm2d()
+        
+        self.f1x1_conv = nn.LazyConv2d(out_channels=f1x1[0], kernel_size=1, stride=1, padding="same", bias=False)
+        
+        self.f1xn_conv1x1 = nn.LazyConv2d(out_channels=f1xn[0], kernel_size=1, stride=1, padding="same", bias=False)
+        self.f1xn_conv1xn = nn.LazyConv2d(out_channels=f1xn[1], kernel_size=(1,7), stride=1, padding="same", bias=False)
+        self.f1xn_convnx1 = nn.LazyConv2d(out_channels=f1xn[2], kernel_size=(7, 1), stride=1, padding="same", bias=False)
+        
+        
+        
