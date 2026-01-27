@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.41.1 (2026-01-27)
+
+### Fix
+
+* fix: update InceptionV3BlockB ([`2542cb5`](https://github.com/agbleze/mining_sites_detector/commit/2542cb55a3290e2c0c926bd9f13293bf085d75a4))
+
 ## v0.41.0 (2026-01-26)
 
 ### Feature
