@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.41.3 (2026-01-28)
+
+### Fix
+
+* fix: add forward method to InceptionV3BlockB ([`fd00979`](https://github.com/agbleze/mining_sites_detector/commit/fd0097902d886a035b20fd42722715efbbde71d6))
+
 ## v0.41.2 (2026-01-27)
 
 ### Fix
