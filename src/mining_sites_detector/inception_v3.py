@@ -135,4 +135,41 @@ class InceptionV3BlockB(nn.Module):
         self.pool_conv1x1 = nn.LazyConv2d(out_channels=fpool[0], kernel_size=1, stride=1, padding="same", bias=False)
         
         
-        
+def forward(self, x):
+    x_f1x1 = self.f1x1_conv(x)
+    x_f1x1 = self.bn(x_f1x1)
+    x_f1x1 = self.act(x_f1x1)
+    
+    x_f1xn = self.f1xn_conv1x1(x)
+    x_f1xn = self.bn(x_f1xn)
+    x_f1xn = self.act(x_f1xn)
+    x_f1xn = self.f1xn_conv1xn(x_f1xn)
+    x_f1xn = self.bn(x_f1xn)
+    x_f1xn = self.act(x_f1xn)
+    x_f1xn = self.f1xn_convnx1(x_f1xn)
+    x_f1xn = self.bn(x_f1xn)
+    x_f1xn = self.act(x_f1xn)
+    
+    x_f1xndbl = self.f1xndbl_conv1x1(x)
+    x_f1xndbl = self.bn(x_f1xndbl)
+    x_f1xndbl = self.act(x_f1xndbl)
+    x_f1xndbl = self.f1xndbl_conv1xn_a(x_f1xndbl)
+    x_f1xndbl = self.bn(x_f1xndbl)
+    x_f1xndbl = self.act(x_f1xndbl)
+    x_f1xndbl = self.f1xndbl_convnx1_a(x_f1xndbl)
+    x_f1xndbl = self.bn(x_f1xndbl)
+    x_f1xndbl = self.act(x_f1xndbl)
+    x_f1xndbl = self.f1xndbl_conv1xn_b(x_f1xndbl)
+    x_f1xndbl = self.bn(x_f1xndbl)
+    x_f1xndbl = self.act(x_f1xndbl)
+    x_f1xndbl = self.f1xndbl_convnx1_b(x_f1xndbl)
+    x_f1xndbl = self.bn(x_f1xndbl)
+    x_f1xndbl = self.act(x_f1xndbl)
+    
+    x_pool = self.avgpool(x)
+    x_pool = self.pool_conv1x1(x_pool)
+    x_pool = self.bn(x_pool)
+    x_pool = self.act(x_pool)
+    
+    output = torch.concat([x_f1x1, x_f1xn, x_f1xndbl, x_pool], dim=1)
+    return output        
