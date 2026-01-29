@@ -172,4 +172,35 @@ def forward(self, x):
     x_pool = self.act(x_pool)
     
     output = torch.concat([x_f1x1, x_f1xn, x_f1xndbl, x_pool], dim=1)
-    return output        
+    return output    
+
+
+
+class InceptionV3BlockC(nn.Module):
+    def __init__(self, f1x1, f3x3, f3x3dbl, fpool):
+        super().__init__()
+        
+        self.act = nn.ReLU()
+        self.bn = nn.BatchNorm2d()
+        
+        self.f1x1_conv1x1 = nn.LazyConv2d(out_channels=f1x1[0], kernel_size=1, stride=1, padding="same", bias=False)
+        
+        self.f3x3_conv1x1 = nn.LazyConv2d(out_channels=f3x3[0], kernel_size=1, stride=1, padding="same", bias=False)
+        self.f3x3_conv1x3 = nn.LazyConv2d(out_channels=f3x3[1], kernel_size=(1,3), stride=1, padding="same", bias=False)
+        self.f3x3_conv3x1 = nn.LazyConv2d(out_channels=f3x3[2], kernel_size=(3,1), stride=1, padding="same", bias=False)
+        
+        self.f3x3dbl_conv1x1 = nn.LazyConv2d(out_channels=f3x3dbl[0], kernel_size=1, stride=1, padding="same", bias=False)
+        self.f3x3dbl_conv3x3 = nn.LazyConv2d(out_channels=f3x3dbl[1], kernel_size=3, stride=1, padding="same", bias=False)
+        self.f3x3dbl_conv1x3 = nn.LazyConv2d(out_channels=f3x3dbl[2], kernel_size=(1 ,3), stride=1, padding="same", bias=False)
+        self.f3x3dbl_conv3x1 = nn.LazyConv2d(out_channels=f3x3dbl[3], kernel_size=(3, 1), stride=1, padding="same", bias=False)
+        
+        self.fpool_conv1x1 = nn.LazyConv2d(out_channels=fpool[0], kernel_size=1, stride=1, padding="same", bias=False)
+        self.avgpool = nn.AvgPool2d(kernel_size=3, stride=1, padding="same")
+        
+        
+    def forward(self, x):
+        x_f1x1 = self.f1x1_conv1x1(x)
+        x_f1x1 = self.bn(x_f1x1)
+        x_f1x1 = self.act(x_f1x1)
+        
+        
