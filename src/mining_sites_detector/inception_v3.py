@@ -203,4 +203,12 @@ class InceptionV3BlockC(nn.Module):
         x_f1x1 = self.bn(x_f1x1)
         x_f1x1 = self.act(x_f1x1)
         
+        x_f3x3 = self.f3x3_conv1x1(x)
+        x_f3x3 = self.bn(x_f3x3)
+        x_f3x3 = self.act(x_f3x3)
+        
+        
+        
+        
+        
         
