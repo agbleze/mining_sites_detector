@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.43.0 (2026-01-30)
+
+### Feature
+
+* feat: update InceptionV3BlockC ([`ef4d70f`](https://github.com/agbleze/mining_sites_detector/commit/ef4d70f662762c7112cb3d6fb6aeb13d321d4cee))
+
 ## v0.42.0 (2026-01-29)
 
 ### Feature
