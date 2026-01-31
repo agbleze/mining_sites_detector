@@ -203,9 +203,29 @@ class InceptionV3BlockC(nn.Module):
         x_f1x1 = self.bn(x_f1x1)
         x_f1x1 = self.act(x_f1x1)
         
+        
         x_f3x3 = self.f3x3_conv1x1(x)
         x_f3x3 = self.bn(x_f3x3)
         x_f3x3 = self.act(x_f3x3)
+        
+        x_f3x3_1x3 = self.f3x3_conv1x3(x_f3x3)
+        x_f3x3_1x3 = self.bn(x_f3x3_1x3)
+        x_f3x3_1x3 = self.act(x_f3x3_1x3)
+        
+        x_f3x3_3x1 = self.f3x3_conv3x1(x_f3x3)
+        x_f3x3_3x1 = self.bn(x_f3x3_3x1)
+        x_f3x3_3x1 = self.act(x_f3x3_3x1)
+        
+        
+        x_f3x3dbl = self.f3x3dbl_conv1x1(x)
+        x_f3x3dbl = self.bn(x_f3x3dbl)
+        x_f3x3dbl = self.act(x_f3x3dbl)
+        
+        x_f3x3dbl = self.f3x3dbl_conv3x3(x_f3x3dbl)
+        x_f3x3dbl = self.bn(x_f3x3dbl)
+        x_f3x3dbl = self.act(x_f3x3dbl)
+        
+        
         
         
         
