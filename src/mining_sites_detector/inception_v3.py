@@ -225,9 +225,22 @@ class InceptionV3BlockC(nn.Module):
         x_f3x3dbl = self.bn(x_f3x3dbl)
         x_f3x3dbl = self.act(x_f3x3dbl)
         
+        x_f3x3dbl = self.f3x3dbl_conv1x3(x_f3x3dbl)
+        x_f3x3dbl = self.bn(x_f3x3dbl)
+        x_f3x3dbl = self.act(x_f3x3dbl)
+        
+        x_f3x3dbl = self.f3x3dbl_conv3x1(x_f3x3dbl)
+        x_f3x3dbl = self.bn(x_f3x3dbl)
+        x_f3x3dbl = self.act(x_f3x3dbl)
         
         
+        x_pool = self.avgpool(x)
+        x_pool = self.fpool_conv1x1(x_pool)
+        x_pool = self.bn(x_pool)
+        x_pool = self.act(x_pool)
         
+        output = torch.concat([x_f1x1, x_f3x3_1x3, x_f3x3_3x1, x_f3x3dbl, x_pool], dim=1)
+        return output
         
         
         
