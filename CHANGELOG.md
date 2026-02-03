@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.44.0 (2026-02-03)
+
+### Feature
+
+* feat: add reduction module ([`d7c54eb`](https://github.com/agbleze/mining_sites_detector/commit/d7c54eb926eb1f750d25e3ac8596c0fc42887e8a))
+
+### Fix
+
+* fix: indent method well ([`d88f817`](https://github.com/agbleze/mining_sites_detector/commit/d88f81793212875a4180c157238a9d413bdb67f5))
+
 ## v0.43.2 (2026-02-01)
 
 ### Fix
