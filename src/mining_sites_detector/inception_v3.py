@@ -244,4 +244,6 @@ class InceptionV3BlockC(nn.Module):
         
         
         
-        
+class InceptionV3ReductionA(nn.Module):
+    def __init__(self):
+        super().__init__()        
