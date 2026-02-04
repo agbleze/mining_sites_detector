@@ -245,5 +245,10 @@ class InceptionV3BlockC(nn.Module):
         
         
 class InceptionV3ReductionA(nn.Module):
-    def __init__(self):
-        super().__init__()        
+    def __init__(self, f3x3=384, f3x3dbl=(64, 96, 96)):
+        super().__init__()
+        self.act = nn.ReLU()
+        self.bn = nn.BatchNorm2d()
+        
+        
+                
