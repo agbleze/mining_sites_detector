@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.44.1 (2026-02-04)
+
+### Fix
+
+* fix: update with ReLU and BatchNorm ([`9ec61c2`](https://github.com/agbleze/mining_sites_detector/commit/9ec61c2a888e5bc7b5894cca299d71eb67931616))
+
 ## v0.44.0 (2026-02-03)
 
 ### Feature
