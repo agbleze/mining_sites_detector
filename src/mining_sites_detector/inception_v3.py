@@ -250,5 +250,18 @@ class InceptionV3ReductionA(nn.Module):
         self.act = nn.ReLU()
         self.bn = nn.BatchNorm2d()
         
+        # grid reduction
+        self.f3x3_conv3x3 = nn.LazyConv2d(out_channels=f3x3, kernel_size=3, stride=2, padding="valid", bias=False)
+        # double 3x3 branch 
+        # 3x3 reduction
+        self.f3x3dbl_conv1x1 = nn.LazyConv2d(out_channels=f3x3dbl[0], kernel_size=1, stride=1, padding="same", bias=False)
+        self.f3x3dbl_conv3x3_a = nn.LazyConv2d(out_channels=f3x3dbl[1], kernel_size=3, stride=1, padding="same", bias=False)
+        
+        # grid reduction
+        self.f3x3dbl_conv3x3_b = nn.LazyConv2d(out_channels=f3x3dbl[2], kernel_size=3, stride=2, padding="valid", bias=False)
+        
+        
+        
+        
         
                 
