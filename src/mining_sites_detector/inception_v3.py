@@ -249,6 +249,7 @@ class InceptionV3ReductionA(nn.Module):
         super().__init__()
         self.act = nn.ReLU()
         self.bn = nn.BatchNorm2d()
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
         
         # grid reduction
         self.f3x3_conv3x3 = nn.LazyConv2d(out_channels=f3x3, kernel_size=3, stride=2, padding="valid", bias=False)
@@ -259,8 +260,28 @@ class InceptionV3ReductionA(nn.Module):
         
         # grid reduction
         self.f3x3dbl_conv3x3_b = nn.LazyConv2d(out_channels=f3x3dbl[2], kernel_size=3, stride=2, padding="valid", bias=False)
+    
+    def forward(self, x):
+        x_f3x3 = self.f3x3_conv3x3(x)
+        x_f3x3 = self.bn(x_f3x3)
+        x_f3x3 = self.act(x_f3x3)
         
         
+        x_f3x3dbl = self.f3x3dbl_conv1x1(x)
+        x_f3x3dbl = self.bn(x_f3x3dbl)
+        x_f3x3dbl = self.act(x_f3x3dbl)
+        
+        x_f3x3dbl = self.f3x3dbl_conv3x3_a(x_f3x3dbl)
+        x_f3x3dbl = self.bn(x_f3x3dbl)
+        x_f3x3dbl = self.act(x_f3x3dbl)
+        
+        x_f3x3dbl = self.f3x3dbl_conv3x3_b(x_f3x3dbl)
+        x_f3x3dbl = self.bn(x_f3x3dbl)
+        x_f3x3dbl = self.act(x_f3x3dbl)
+        
+        x_bpool = self.maxpool(x)
+        output = torch.concat([x_f3x3, x_f3x3dbl, x_bpool], dim=1)
+        return output
         
         
         
