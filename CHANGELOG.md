@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.44.2 (2026-02-05)
+
+### Fix
+
+* fix: add forward method ([`d03aa2c`](https://github.com/agbleze/mining_sites_detector/commit/d03aa2c374092972f86d6c6840a9687fa66d9292))
+
+### Unknown
+
+* fix update InceptionV3ReductionA ([`a34e8f2`](https://github.com/agbleze/mining_sites_detector/commit/a34e8f26784c2d89aacdae5b92e8c30d66cff574))
+
 ## v0.44.1 (2026-02-04)
 
 ### Fix
