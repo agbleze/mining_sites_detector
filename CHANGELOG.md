@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.45.0 (2026-02-07)
+
+### Feature
+
+* feat: add InceptionV3ReductionB ([`ce190d2`](https://github.com/agbleze/mining_sites_detector/commit/ce190d2909929e3d8ab6d379a5962d7ee649b6f0))
+
 ## v0.44.2 (2026-02-05)
 
 ### Fix
