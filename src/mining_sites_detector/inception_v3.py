@@ -327,3 +327,32 @@ class InceptionV3ReductionB(nn.Module):
         x_bpool = self.maxpool(x)
         output = torch.concat([x_f3x3, x_f7x7, x_bpool], dim=1)
         return output
+    
+    
+    
+class InceptionV3Auxiliary(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        self.avgpool = nn.AvgPool2d(kernel_size=5, stride=3)
+        self.act = nn.ReLU()
+        self.bn = nn.BatchNorm2d()
+        
+        self.conv1x1 = nn.LazyConv2d(out_channels=128, kernel_size=1, stride=1, bias=False)
+        self.conv5x5 = nn.LazyConv2d(out_channels=768, kernel_size=5, stride=1, bias=False)  
+        self.fc = nn.LazyLinear(out_features=num_classes)
+        self.softmax = nn.Softmax(dim=1)
+        
+    def forward(self, x):
+        x = self.avgpool(x)
+        x = self.conv1x1(x)
+        x = self.bn(x)
+        x = self.act(x)
+        x = self.conv5x5(x)
+        x = self.bn(x)
+        x = self.act(x)
+        x = torch.flatten(x, start_dim=1)
+        x = self.fc(x)
+        return self.softmax(x)
+    
+    
+    
