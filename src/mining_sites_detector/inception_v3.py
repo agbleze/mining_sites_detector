@@ -355,4 +355,19 @@ class InceptionV3Auxiliary(nn.Module):
         return self.softmax(x)
     
     
+
+class InceptionV3Classifier(nn.Module):
+    def __init__(self, num_classes, dropout_rate=0.4):
+        super().__init__()
+        self.avgpool = nn.AvgPool2d(kernel_size=8)
+        self.dropout = nn.Dropout(dropout_rate)
+        self.fc = nn.LazyLinear(out_features=num_classes)
+        self.softmax = nn.Softmax(dim=1)
+        
+    def forward(self, x):
+        x = self.avgpool(x)
+        x = self.dropout(x)
+        x = torch.flatten(x, start_dim=1)
+        x = self.fc(x)
+        return self.softmax(x)
     
