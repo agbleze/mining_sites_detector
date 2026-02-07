@@ -108,9 +108,6 @@ class InceptionV3BlockA(nn.Module):
         return output
         
         
-        
-        
-    
     
 class InceptionV3BlockB(nn.Module):
     def __init__(self, f1x1, f1xn, f1xndbl, fpool):
@@ -173,7 +170,6 @@ class InceptionV3BlockB(nn.Module):
         
         output = torch.concat([x_f1x1, x_f1xn, x_f1xndbl, x_pool], dim=1)
         return output    
-
 
 
 class InceptionV3BlockC(nn.Module):
@@ -242,8 +238,7 @@ class InceptionV3BlockC(nn.Module):
         output = torch.concat([x_f1x1, x_f3x3_1x3, x_f3x3_3x1, x_f3x3dbl, x_pool], dim=1)
         return output
         
-        
-        
+               
 class InceptionV3ReductionA(nn.Module):
     def __init__(self, f3x3=384, f3x3dbl=(64, 96, 96)):
         super().__init__()
@@ -285,4 +280,50 @@ class InceptionV3ReductionA(nn.Module):
         
         
         
-                
+class InceptionV3ReductionB(nn.Module):
+    def __init__(self, f3x3=(192, 320), f7x7=(192, 192, 192, 192)):
+        super().__init__()
+        self.act = nn.ReLU()
+        self.bn = nn.BatchNorm2d()    
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)  
+        
+        # 3x3 branch reduction
+        self.f3x3_conv1x1 = nn.LazyConv2d(out_channels=f3x3[0], kernel_size=1, stride=1, padding="same", bias=False) 
+        self.f3x3_conv3x3 = nn.LazyConv2d(out_channels=f3x3[1], kernel_size=3, stride=2, padding="valid", bias=False)        
+        
+        # 7x7 branch refactored into 1x7, 7x1 for reduction with 3x3 stride = 2
+        self.f7x7_conv1x1 = nn.LazyConv2d(out_channels=f7x7[0], kernel_size=1, stride=1, padding="same", bias=False)
+        self.f7x7_conv1x7 = nn.LazyConv2d(out_channels=f7x7[1], kernel_size=(1,7), stride=1, padding="same", bias=False)
+        self.f7x7_conv7x1 = nn.LazyConv2d(out_channels=f7x7[2], kernel_size=(7,1), stride=1, padding="same", bias=False)
+        self.f7x7_conv3x3 = nn.LazyConv2d(out_channels=f7x7[3], kernel_size=3, stride=2, padding="valid", bias=False)
+        
+        
+    def forward(self, x):
+        x_f3x3 = self.f3x3_conv1x1(x)
+        x_f3x3 = self.bn(x_f3x3)
+        x_f3x3 = self.act(x_f3x3)
+        
+        x_f3x3 = self.f3x3_conv3x3(x_f3x3)
+        x_f3x3 = self.bn(x_f3x3)
+        x_f3x3 = self.act(x_f3x3)
+        
+        
+        x_f7x7 = self.f7x7_conv1x1(x)
+        x_f7x7 = self.bn(x_f7x7)
+        x_f7x7 = self.act(x_f7x7)
+        
+        x_f7x7 = self.f7x7_conv1x7(x_f7x7)
+        x_f7x7 = self.bn(x_f7x7)
+        x_f7x7 = self.act(x_f7x7)
+        
+        x_f7x7 = self.f7x7_conv7x1(x_f7x7)
+        x_f7x7 = self.bn(x_f7x7)
+        x_f7x7 = self.act(x_f7x7)
+        
+        x_f7x7 = self.f7x7_conv3x3(x_f7x7)
+        x_f7x7 = self.bn(x_f7x7)
+        x_f7x7 = self.act(x_f7x7)
+        
+        x_bpool = self.maxpool(x)
+        output = torch.concat([x_f3x3, x_f7x7, x_bpool], dim=1)
+        return output
