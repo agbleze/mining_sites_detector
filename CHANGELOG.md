@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.46.0 (2026-02-07)
+
+### Feature
+
+* feat: add InceptionV3Classifier ([`697928a`](https://github.com/agbleze/mining_sites_detector/commit/697928af01283b3b00b9e027ff53a45ec06e1f63))
+
+* feat: add InceptionV3Auxiliary ([`2847d44`](https://github.com/agbleze/mining_sites_detector/commit/2847d44156cca7db505aaaf71c1f9b0988b66c4b))
+
 ## v0.45.0 (2026-02-07)
 
 ### Feature
