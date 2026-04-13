@@ -1,6 +1,17 @@
 # CHANGELOG
 
+## v0.48.0 (2026-04-13)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+reconcile release ([`82405ba`](https://github.com/agbleze/mining_sites_detector/commit/82405ba0107819055354ec2330e249d4e57025dc))
+
 ## v0.47.0 (2026-04-12)
+
+### Feature
+
+* feat: add initial RestNextSTem ([`00076d9`](https://github.com/agbleze/mining_sites_detector/commit/00076d952ede40db1dddd842bcc2f5304739803c))
 
 ### Unknown
 
