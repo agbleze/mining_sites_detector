@@ -1,8 +1,17 @@
 # CHANGELOG
 
+## v0.47.0 (2026-04-12)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+reconcile repo ([`1a65a08`](https://github.com/agbleze/mining_sites_detector/commit/1a65a0899a1debcd4d2ff1f674dcd7c6abf512ab))
+
 ## v0.46.0 (2026-02-07)
 
 ### Feature
+
+* feat: add densenet ([`b64fad3`](https://github.com/agbleze/mining_sites_detector/commit/b64fad3b958fa9f2a81c5f13a31980c0134c7947))
 
 * feat: add InceptionV3Classifier ([`697928a`](https://github.com/agbleze/mining_sites_detector/commit/697928af01283b3b00b9e027ff53a45ec06e1f63))
 
