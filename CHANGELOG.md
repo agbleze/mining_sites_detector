@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.48.1 (2026-04-14)
+
+### Fix
+
+* fix: change RestNextStem ([`d659b07`](https://github.com/agbleze/mining_sites_detector/commit/d659b0763318d2ea5dc48a114205a8f756a371fc))
+
 ## v0.48.0 (2026-04-13)
 
 ### Unknown
