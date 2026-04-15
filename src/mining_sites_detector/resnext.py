@@ -8,5 +8,11 @@ class RestNextStem(nn.Module):
         self.conv = nn.LazyConv2d(out_channels=64, kernel_size=7, stride=2)
         self.maxpool = nn.MaxPool2d(kernel_size=2)
         
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.maxpool(x)
+        return x
+        
+        
         
         
