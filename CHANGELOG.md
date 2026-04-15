@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.49.0 (2026-04-15)
+
+### Feature
+
+* feat: add forward ([`b5d2bb6`](https://github.com/agbleze/mining_sites_detector/commit/b5d2bb63111d029cc07af30a704dcce489e737b6))
+
 ## v0.48.1 (2026-04-14)
 
 ### Fix
