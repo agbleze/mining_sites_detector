@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.49.1 (2026-04-16)
+
+### Fix
+
+* fix: update to ResNextStem ([`8cb5d73`](https://github.com/agbleze/mining_sites_detector/commit/8cb5d733317379e9572d679fdd94875cecca7af0))
+
 ## v0.49.0 (2026-04-15)
 
 ### Feature
