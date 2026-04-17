@@ -19,4 +19,8 @@ class ResNextStem(nn.Module):
         
         
         
+class ResNextIdentityBlock(nn.Module):
+    def __init__(self):
+        super(self).__init__(self) 
         
+               
