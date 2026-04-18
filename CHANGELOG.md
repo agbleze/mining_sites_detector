@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.51.0 (2026-04-18)
+
+### Feature
+
+* feat: add ResNextClassifier ([`3760a0f`](https://github.com/agbleze/mining_sites_detector/commit/3760a0fd4f2e8e29d61d4a8cf8e7330f7c1bc396))
+
+### Fix
+
+* fix: update ResNextStem ([`c2c898c`](https://github.com/agbleze/mining_sites_detector/commit/c2c898c80709018bb1b3b455e4c3c56ac111b492))
+
 ## v0.50.0 (2026-04-17)
 
 ### Feature
