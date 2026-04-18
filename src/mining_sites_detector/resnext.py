@@ -6,7 +6,7 @@ class ResNextStem(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv = nn.LazyConv2d(out_channels=64, kernel_size=7, stride=2, bias=False)
-        self.maxpool = nn.MaxPool2d(kernel_size=2)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding="same")
         self.bn = nn.BatchNorm2d()
         self.act = nn.ReLU()
         
