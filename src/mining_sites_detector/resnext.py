@@ -17,6 +17,19 @@ class ResNextStem(nn.Module):
         x = self.maxpool(x)
         return x
         
+
+class ResNextClassifier(nn.Module):
+    def __init__(self, num_classes, **kwargs):
+        super().__init__(**kwargs)
+        self.global_avgpool = nn.AvgPool2d(kernel_size=1)
+        self.fc = nn.LazyLinear(out_features=num_classes)   
+        self.softmax = nn.Softmax(dim=1)     
+        
+    def forward(self, x):
+        x = self.global_avgpool(x)
+        x = torch.flatten(x, start_dim=1)
+        x = self.softmax(x)
+        return x
         
         
 class ResNextIdentityBlock(nn.Module):
