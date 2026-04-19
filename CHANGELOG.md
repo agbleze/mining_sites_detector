@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.53.0 (2026-04-19)
+
+### Feature
+
+* feat: add projection layer to ResNextProjectionBlock ([`6c1c325`](https://github.com/agbleze/mining_sites_detector/commit/6c1c325dcf1ae026fba777f146adbd15aa40e375))
+
 ## v0.52.0 (2026-04-19)
 
 ### Feature
