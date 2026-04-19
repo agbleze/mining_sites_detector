@@ -71,4 +71,15 @@ class ResNextIdentityBlock(nn.Module):
         x = self.relu(x)
         return x
         
-               
+
+class ResNextProjectionBlock(nn.Module):
+    def __init__(self, filters_in, filters_out, cardinality=32, strides=2, **kwargs):
+        super().__init__(**kwargs)
+        # construct projection shortcut layer
+        self.proj = nn.Sequential(nn.LazyConv2d(out_channels=filters_out, kernel_size=1,
+                                                stride=strides, padding="same",
+                                                ),
+                                  nn.LazyBatchNorm2d(),
+                                  )
+        
+    
