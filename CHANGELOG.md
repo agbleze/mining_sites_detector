@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.52.0 (2026-04-19)
+
+### Feature
+
+* feat: add ResNextIdentityBlock ([`215d317`](https://github.com/agbleze/mining_sites_detector/commit/215d3171c8a2947707f2cba3f73a4413435e382e))
+
 ## v0.51.0 (2026-04-18)
 
 ### Feature
