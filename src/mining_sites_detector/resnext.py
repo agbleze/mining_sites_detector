@@ -27,13 +27,48 @@ class ResNextClassifier(nn.Module):
         
     def forward(self, x):
         x = self.global_avgpool(x)
-        x = torch.flatten(x, start_dim=1)
+        x = torch.flatten(x, dim=1)
         x = self.softmax(x)
         return x
         
         
 class ResNextIdentityBlock(nn.Module):
-    def __init__(self):
+    def __init__(self, filter_in, filter_out, cardinality=32):
         super(self).__init__(self) 
+        
+        # 1x1 Dimensionality reduction
+        self.reduce = nn.Sequential(
+                                    nn.LazyConv2d(out_channels=filter_in, kernel_size=1, stride=1, padding="same", bias=False),
+                                    nn.BatchNorm2d(),
+                                    nn.ReLU()
+                                )
+        
+        # Cardinality (wide) Layer split-transform
+        self.group = nn.Sequential(nn.LazyConv2d(out_channels=filter_in, kernel_size=3, stride=1, padding="same", bias=False, 
+                                                 groups=cardinality
+                                                ),
+                                   nn.LazyBatchNorm2d(),
+                                   )
+        self.relu = nn.ReLU()
+        
+        # 1x1 expansion 
+        self.expand = nn.Sequential(nn.LazyConv2d(out_channels=filter_out,
+                                                  kernel_size=1,
+                                                  stride=1,
+                                                  padding="same", bias=False
+                                                  ),
+                                    nn.LazyBatchNorm2d(),
+                                    nn.ReLU()
+                                    )
+        
+        
+    def forward(self, x):
+        shortcut = x
+        x = self.reduce(x)
+        x = self.group(x)
+        x = self.expand(x)
+        x += shortcut
+        x = self.relu(x)
+        return x
         
                
