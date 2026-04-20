@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.54.0 (2026-04-20)
+
+### Feature
+
+* feat: add ResNextProjectionBlock ([`98f641c`](https://github.com/agbleze/mining_sites_detector/commit/98f641c1bfcd892dfc3842a10fcb52fc4a8c15e9))
+
 ## v0.53.0 (2026-04-19)
 
 ### Feature
