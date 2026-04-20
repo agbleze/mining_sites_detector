@@ -82,4 +82,41 @@ class ResNextProjectionBlock(nn.Module):
                                   nn.LazyBatchNorm2d(),
                                   )
         
+        # Dimensionality reduction
+        self.reduce = nn.Sequential(nn.LazyConv2d(out_channels=filters_in, kernel_size=1,
+                                                  stride=1, padding="same", bias=False
+                                                  ),
+                                    nn.LazyBatchNorm2d(),
+                                    nn.ReLU()
+                                    )
+        
+        # Cardinality (wide) Layer split-transform
+        self.group_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_in,
+                                                      kernel_size=3,
+                                                      stride=strides,
+                                                      padding="same",
+                                                      bias=False,
+                                                      groups=cardinality
+                                                      ),
+                                        nn.LazyBatchNorm2d(),
+                                        nn.ReLU()
+                                        )
+        # 1x1 expansion dimensionality restoration
+        self.expand = nn.Sequential(nn.LazyConv2d(out_channels=filters_out,
+                                                  kernel_size=1, stride=1,
+                                                  padding="same", bias=False
+                                                  ),
+                                    nn.LazyBatchNorm2d(),
+                                    )
+        self.relu = nn.ReLU()
+        
+    def forward(self, x):
+        shortcut = self.proj(x)
+        x = self.reduce(x)
+        x = self.group_conv(x)
+        x = self.expand(x)
+        x += shortcut
+        x = self.relu(x)
+        return x
+        
     
