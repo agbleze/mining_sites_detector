@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-
+from .models.utils import kernel_initializer
 
 class ResNextStem(nn.Module):
     def __init__(self):
@@ -120,3 +120,43 @@ class ResNextProjectionBlock(nn.Module):
         return x
         
     
+def group(filters_in, filters_out, n_blocks, cardinality=32, strides=2):
+    block_collection = []
+    block = ResNextProjectionBlock(filters_in=filters_in, filters_out=filters_out,
+                               cardinality=cardinality, strides=strides
+                               )
+    block_collection.append(block)
+    for _ in range(n_blocks):
+        block = ResNextIdentityBlock(filter_in=filters_in, filters_out=filters_out, cardinality=cardinality)
+        block_collection.append(block)
+    
+    return nn.Sequential(*block_collection)
+    
+    
+    
+def learner(groups, cardinality=32):
+    filters_in, filters_out, n_blocks = groups.pop(0)
+    x = group(filters_in=filters_in, n_blocks=n_blocks, strides=1, cardinality=cardinality)
+    
+    for filters_in, filters_out, n_blocks in groups:
+        x = group(filters_in=filters_in, filters_out=filters_out, n_blocks=n_blocks, cardinality=cardinality)
+        
+    return x
+
+
+groups = {50: [(128, 256, 3), (256, 512, 4), (512, 1024, 6), (1024, 2048, 3)],
+          101: [(128, 256, 3), (256, 512, 4), (512, 1024, 23), (1024, 2048, 3)],
+          152: [(128, 256, 3), (256, 512, 8), (512, 1024, 36), (1024, 2048, 3)]
+          }
+
+cardinality = 32
+
+stem = ResNextStem()
+learner_module = learner(groups=groups[50], cardinality=cardinality)
+classifier = ResNextClassifier(num_classes=2)
+
+model = nn.Sequential(stem, learner_module, classifier)
+example_input = torch.randn(1, 3, 224, 224)
+
+model(example_input)
+model.apply(kernel_initializer)
