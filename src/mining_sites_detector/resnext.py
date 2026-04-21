@@ -1,13 +1,22 @@
 import torch.nn as nn
 import torch
-from .models.utils import kernel_initializer
+#from mining_sites_detector.models.utils import kernel_initializer
 
+def kernel_initializer(m, kernel_initializer="he_normal"):
+    if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+        if kernel_initializer == "he_normal":
+            nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
+        elif kernel_initializer == "glorot_uniform":
+            nn.init.xavier_uniform_(m.weight)
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+            
 class ResNextStem(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv = nn.LazyConv2d(out_channels=64, kernel_size=7, stride=2, bias=False)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding="same")
-        self.bn = nn.BatchNorm2d()
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.bn = nn.LazyBatchNorm2d()
         self.act = nn.ReLU()
         
     def forward(self, x):
@@ -27,19 +36,20 @@ class ResNextClassifier(nn.Module):
         
     def forward(self, x):
         x = self.global_avgpool(x)
-        x = torch.flatten(x, dim=1)
+        x = torch.flatten(x, start_dim=1)
+        x = self.fc(x)
         x = self.softmax(x)
         return x
         
         
 class ResNextIdentityBlock(nn.Module):
     def __init__(self, filter_in, filter_out, cardinality=32):
-        super(self).__init__(self) 
+        super().__init__() 
         
         # 1x1 Dimensionality reduction
         self.reduce = nn.Sequential(
                                     nn.LazyConv2d(out_channels=filter_in, kernel_size=1, stride=1, padding="same", bias=False),
-                                    nn.BatchNorm2d(),
+                                    nn.LazyBatchNorm2d(),
                                     nn.ReLU()
                                 )
         
@@ -77,7 +87,7 @@ class ResNextProjectionBlock(nn.Module):
         super().__init__(**kwargs)
         # construct projection shortcut layer
         self.proj = nn.Sequential(nn.LazyConv2d(out_channels=filters_out, kernel_size=1,
-                                                stride=strides, padding="same",
+                                                stride=strides,
                                                 ),
                                   nn.LazyBatchNorm2d(),
                                   )
@@ -94,7 +104,7 @@ class ResNextProjectionBlock(nn.Module):
         self.group_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_in,
                                                       kernel_size=3,
                                                       stride=strides,
-                                                      padding="same",
+                                                      padding=1,
                                                       bias=False,
                                                       groups=cardinality
                                                       ),
@@ -127,7 +137,7 @@ def group(filters_in, filters_out, n_blocks, cardinality=32, strides=2):
                                )
     block_collection.append(block)
     for _ in range(n_blocks):
-        block = ResNextIdentityBlock(filter_in=filters_in, filters_out=filters_out, cardinality=cardinality)
+        block = ResNextIdentityBlock(filter_in=filters_in, filter_out=filters_out, cardinality=cardinality)
         block_collection.append(block)
     
     return nn.Sequential(*block_collection)
@@ -135,28 +145,31 @@ def group(filters_in, filters_out, n_blocks, cardinality=32, strides=2):
     
     
 def learner(groups, cardinality=32):
+    group_col = []
     filters_in, filters_out, n_blocks = groups.pop(0)
-    x = group(filters_in=filters_in, n_blocks=n_blocks, strides=1, cardinality=cardinality)
-    
+    x = group(filters_in=filters_in, filters_out=filters_out, n_blocks=n_blocks, strides=1, cardinality=cardinality)
+    group_col.append(x)
     for filters_in, filters_out, n_blocks in groups:
         x = group(filters_in=filters_in, filters_out=filters_out, n_blocks=n_blocks, cardinality=cardinality)
-        
-    return x
+        group_col.append(x)
+    return nn.Sequential(*group_col)
 
+if __name__ == "__main__":
 
-groups = {50: [(128, 256, 3), (256, 512, 4), (512, 1024, 6), (1024, 2048, 3)],
-          101: [(128, 256, 3), (256, 512, 4), (512, 1024, 23), (1024, 2048, 3)],
-          152: [(128, 256, 3), (256, 512, 8), (512, 1024, 36), (1024, 2048, 3)]
-          }
+    groups = {50: [(128, 256, 3), (256, 512, 4), (512, 1024, 6), (1024, 2048, 3)],
+            101: [(128, 256, 3), (256, 512, 4), (512, 1024, 23), (1024, 2048, 3)],
+            152: [(128, 256, 3), (256, 512, 8), (512, 1024, 36), (1024, 2048, 3)]
+            }
 
-cardinality = 32
+    cardinality = 32
 
-stem = ResNextStem()
-learner_module = learner(groups=groups[50], cardinality=cardinality)
-classifier = ResNextClassifier(num_classes=2)
+    stem = ResNextStem()
+    learner_module = learner(groups=groups[50], cardinality=cardinality)
+    classifier = ResNextClassifier(num_classes=2)
 
-model = nn.Sequential(stem, learner_module, classifier)
-example_input = torch.randn(1, 3, 224, 224)
+    model = nn.Sequential(stem, learner_module, classifier)
+    example_input = torch.randn(1, 3, 224, 224)
 
-model(example_input)
-model.apply(kernel_initializer)
+    _ = model(example_input)
+    model.apply(kernel_initializer)
+
