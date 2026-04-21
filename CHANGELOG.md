@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.55.0 (2026-04-20)
+
+### Feature
+
+* feat: add meta parameters ([`b460f74`](https://github.com/agbleze/mining_sites_detector/commit/b460f7420134a7be22b4c4e8e6f52ac4a027f2f0))
+
 ## v0.54.0 (2026-04-20)
 
 ### Feature
