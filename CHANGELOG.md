@@ -1,10 +1,21 @@
 # CHANGELOG
 
+## v0.55.1 (2026-04-21)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+reconcile with release ([`70c5334`](https://github.com/agbleze/mining_sites_detector/commit/70c533465427e5931de51d7bb6d0bdf5774a602b))
+
 ## v0.55.0 (2026-04-20)
 
 ### Feature
 
 * feat: add meta parameters ([`b460f74`](https://github.com/agbleze/mining_sites_detector/commit/b460f7420134a7be22b4c4e8e6f52ac4a027f2f0))
+
+### Fix
+
+* fix: weight initialization and padding in Lazy Modules ([`26392b9`](https://github.com/agbleze/mining_sites_detector/commit/26392b9058053bf8635fc33bb536c0d71036b501))
 
 ## v0.54.0 (2026-04-20)
 
