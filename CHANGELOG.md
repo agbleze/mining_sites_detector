@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.56.0 (2026-04-22)
+
+### Feature
+
+* feat: add WRNStem ([`65ac077`](https://github.com/agbleze/mining_sites_detector/commit/65ac0776417c859f9552e11b2ea82922f593fb88))
+
 ## v0.55.2 (2026-04-22)
 
 ### Unknown
