@@ -14,7 +14,9 @@ def kernel_initializer(m, kernel_initializer="he_normal"):
 class ResNextStem(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv = nn.LazyConv2d(out_channels=64, kernel_size=7, stride=2, bias=False)
+        self.conv = nn.LazyConv2d(out_channels=64, kernel_size=7, stride=2, 
+                                  bias=False, padding=3
+                                  )
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.bn = nn.LazyBatchNorm2d()
         self.act = nn.ReLU()
@@ -30,7 +32,7 @@ class ResNextStem(nn.Module):
 class ResNextClassifier(nn.Module):
     def __init__(self, num_classes, **kwargs):
         super().__init__(**kwargs)
-        self.global_avgpool = nn.AvgPool2d(kernel_size=1)
+        self.global_avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.LazyLinear(out_features=num_classes)   
         self.softmax = nn.Softmax(dim=1)     
         
@@ -136,7 +138,7 @@ def group(filters_in, filters_out, n_blocks, cardinality=32, strides=2):
                                cardinality=cardinality, strides=strides
                                )
     block_collection.append(block)
-    for _ in range(n_blocks):
+    for _ in range(n_blocks -1):
         block = ResNextIdentityBlock(filter_in=filters_in, filter_out=filters_out, cardinality=cardinality)
         block_collection.append(block)
     
@@ -165,11 +167,18 @@ if __name__ == "__main__":
 
     stem = ResNextStem()
     learner_module = learner(groups=groups[50], cardinality=cardinality)
-    classifier = ResNextClassifier(num_classes=2)
+    classifier = ResNextClassifier(num_classes=1000)
 
-    model = nn.Sequential(stem, learner_module, classifier)
-    example_input = torch.randn(1, 3, 224, 224)
+    model = nn.Sequential(stem, learner_module, classifier).to("cuda")
+    example_input = torch.randn(1, 3, 224, 224, device="cuda")
 
     _ = model(example_input)
     model.apply(kernel_initializer)
 
+    from torchsummary import summary
+    print(f"Custom ResNext50 model summary:\n{summary(model, input_size=(3, 224, 224))}")
+
+    print("Default ResNext50 model summary:")
+    import torchvision.models as models
+    resnext50 = models.resnext50_32x4d(weights=None).to("cuda")
+    print(f"Default ResNext50 model summary:\n{summary(resnext50, input_size=(3, 224, 224))}")
