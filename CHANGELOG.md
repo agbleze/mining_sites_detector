@@ -1,6 +1,18 @@
 # CHANGELOG
 
+## v0.55.2 (2026-04-22)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+
+reconcile release ([`d3b8efd`](https://github.com/agbleze/mining_sites_detector/commit/d3b8efd4fc6f5ff44e2ed14df8584dff34bab713))
+
 ## v0.55.1 (2026-04-21)
+
+### Fix
+
+* fix: resnext ([`cb7d139`](https://github.com/agbleze/mining_sites_detector/commit/cb7d1395d5ede32faa2710746942020afb9c36e0))
 
 ### Unknown
 
