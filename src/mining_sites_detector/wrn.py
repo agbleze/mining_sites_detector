@@ -22,5 +22,21 @@ class WRNStem(nn.Module):
     
     
     
-    
+class WRNClassifier(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        self.num_classes = num_classes
+        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
+        self.fc = nn.LazyLinear(out_features=num_classes)
+        self.softmax = nn.Softmax(dim=1)
+        
+    def forward(self, x):
+        x = self.avgpool(x)
+        x = torch.flatten(x, start_dim=1)
+        x = self.fc(x)
+        x = self.softmax(x)
+        return x
+        
+        
+            
 
