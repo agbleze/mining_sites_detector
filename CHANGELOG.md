@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.58.0 (2026-04-23)
+
+### Feature
+
+* feat: add WRNProjectionBlock ([`93e6410`](https://github.com/agbleze/mining_sites_detector/commit/93e64102d58da7955a0e689335acc5d2eba2509a))
+
 ## v0.57.0 (2026-04-23)
 
 ### Feature
