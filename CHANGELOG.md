@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.57.0 (2026-04-23)
+
+### Feature
+
+* feat: add WRNClassifier ([`bf70e1d`](https://github.com/agbleze/mining_sites_detector/commit/bf70e1db2c3d173f1f5d96d54a47b4b7bd9b04ef))
+
 ## v0.56.0 (2026-04-22)
 
 ### Feature
