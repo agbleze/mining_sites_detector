@@ -10,7 +10,8 @@ class WRNStem(nn.Module):
         super().__init__()
         
         self.stem_conv = nn.Sequential(nn.LazyConv2d(out_channels=16, kernel_size=3, 
-                                                     #stride=1, #padding="same", 
+                                                     #stride=1, 
+                                                     padding=1, 
                                                      bias=False
                                                      ),
                                        nn.LazyBatchNorm2d(),
@@ -201,7 +202,7 @@ def learner(groups, depth=40):
          
      
         
-group_config = [(16, 4,  0.3, 2), (32, 4, 0.3, 2), (64, 4, 0.3, 2)]   
+ 
 
 
 import torchvision.models as models
@@ -223,13 +224,48 @@ if __name__ == "__main__":
             if m.bias is not None:
                 nn.init.zeros_(m.bias)
                 
-    example_input = torch.randn(1, 3, 224, 224, device="cuda")
-    stem = WRNStem()
-    learner_module = learner(groups=group_config, depth=40)
-    classifier = WRNClassifier(num_classes=1000)
+    example_input = torch.randn(50, 3, 32, 32, device="cuda")
+    # stem = WRNStem()
+    # learner_module = learner(groups=group_config, depth=40)
+    # classifier = WRNClassifier(num_classes=100)
     
-    model = nn.Sequential(stem, learner_module, classifier).to("cuda")
+    # model = nn.Sequential(stem, learner_module, classifier).to("cuda")
+    
+    
+    def make_model(num_classes, group_config, depth=40):
+        stem = WRNStem()
+        learner_module = learner(groups=group_config, depth=depth)
+        classifier = WRNClassifier(num_classes=num_classes)
+        model = nn.Sequential(stem, learner_module, classifier).to("cuda")
+        return model
+    
+
+
+    group_config = [(16, 1,  0.3, 2), (32, 1, 0.3, 2), (64, 1, 0.3, 2)]      
+    model = make_model(num_classes=100, group_config=group_config, depth=40)
     _ = model(example_input)
     model.apply(kernel_initializer)
     
     print(f"Custom WRN model summary:\n{summary(model, input_size=(3, 32, 32))}")
+    
+    # FLOPS at a particular conv layer can be calculated as:
+    # FLOPS = 2 * H_out * W_out * C_out * C_in * K**2
+    # K is the kernel size, C_out is the number of output channels,
+    # C_in is the number of input channels, and 
+    # H_out and W_out are the height and width of the output feature map.
+    
+    # for group convolution use
+    # FLOPS = 2 * H_out * W_out * C_out * (C_in / G) * K**2
+    # where G is the number of groups.
+    
+    
+    from fvcore.nn import FlopCountAnalysis
+    from torch.profiler import profile, record_function, ProfilerActivity
+    flops = FlopCountAnalysis(model, example_input)
+    print(f"FLOPS for the custom WRN model: {flops.total()}")
+    
+    print(f"Execution time profiling for the custom WRN model:")
+    with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof:
+        model(example_input)
+        
+    print(prof.key_averages(group_by_input_shape=True).table(sort_by="cpu_time_total", row_limit=10))
