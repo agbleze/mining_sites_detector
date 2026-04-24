@@ -1,8 +1,17 @@
 # CHANGELOG
 
+## v0.60.0 (2026-04-24)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+reconcile ([`a5d72d0`](https://github.com/agbleze/mining_sites_detector/commit/a5d72d0b5f41d36a3cf2ae6d4d26888e6d0cc4dc))
+
 ## v0.59.0 (2026-04-24)
 
 ### Feature
+
+* feat: add profiling ([`53f5338`](https://github.com/agbleze/mining_sites_detector/commit/53f53387e95a8f67f0aec03f76d462b99c38ebd5))
 
 * feat: add wrn ([`4fefe57`](https://github.com/agbleze/mining_sites_detector/commit/4fefe5758a01eaa58b91d3457833717db58bd066))
 
