@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.59.0 (2026-04-24)
+
+### Feature
+
+* feat: add wrn ([`4fefe57`](https://github.com/agbleze/mining_sites_detector/commit/4fefe5758a01eaa58b91d3457833717db58bd066))
+
 ## v0.58.0 (2026-04-23)
 
 ### Feature
