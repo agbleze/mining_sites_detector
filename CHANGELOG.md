@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.61.0 (2026-04-25)
+
+### Feature
+
+* feat: add flops analysis ([`b923ab4`](https://github.com/agbleze/mining_sites_detector/commit/b923ab4b145c755cc51b608dc1740c5dfdfdec78))
+
 ## v0.60.0 (2026-04-24)
 
 ### Unknown
