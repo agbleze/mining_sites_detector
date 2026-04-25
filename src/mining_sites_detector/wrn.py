@@ -201,7 +201,14 @@ def learner(groups, depth=40):
      
          
      
-        
+from typing import NamedTuple
+
+
+class GroupConfig(NamedTuple):
+    n_filters: int
+    k: int
+    dropout_rate: float
+    l: int        
  
 
 
@@ -224,7 +231,7 @@ if __name__ == "__main__":
             if m.bias is not None:
                 nn.init.zeros_(m.bias)
                 
-    example_input = torch.randn(50, 3, 32, 32, device="cuda")
+    example_input = torch.randn(1, 3, 32, 32, device="cuda")
     # stem = WRNStem()
     # learner_module = learner(groups=group_config, depth=40)
     # classifier = WRNClassifier(num_classes=100)
@@ -232,7 +239,7 @@ if __name__ == "__main__":
     # model = nn.Sequential(stem, learner_module, classifier).to("cuda")
     
     
-    def make_model(num_classes, group_config, depth=40):
+    def make_model(num_classes, group_config, depth=50):
         stem = WRNStem()
         learner_module = learner(groups=group_config, depth=depth)
         classifier = WRNClassifier(num_classes=num_classes)
@@ -240,9 +247,13 @@ if __name__ == "__main__":
         return model
     
 
-
-    group_config = [(16, 1,  0.3, 2), (32, 1, 0.3, 2), (64, 1, 0.3, 2)]      
-    model = make_model(num_classes=100, group_config=group_config, depth=40)
+    group_conv2_config = GroupConfig(n_filters=16, k=2, dropout_rate=0.3, l=2)
+    group_conv3_config = GroupConfig(n_filters=32, k=2, dropout_rate=0.3, l=2)
+    group_conv4_config = GroupConfig(n_filters=64, k=2, dropout_rate=0.3, l=2)
+    
+    
+    group_config = [group_conv2_config, group_conv3_config, group_conv4_config]
+    model = make_model(num_classes=100, group_config=group_config, depth=50)
     _ = model(example_input)
     model.apply(kernel_initializer)
     
@@ -259,13 +270,45 @@ if __name__ == "__main__":
     # where G is the number of groups.
     
     
-    from fvcore.nn import FlopCountAnalysis
+    from fvcore.nn import FlopCountAnalysis, get_bn_modules, flop_count_table, parameter_count_table
+    from fvcore.nn.activation_count import ActivationCountAnalysis
     from torch.profiler import profile, record_function, ProfilerActivity
     flops = FlopCountAnalysis(model, example_input)
     print(f"FLOPS for the custom WRN model: {flops.total()}")
     
     print(f"Execution time profiling for the custom WRN model:")
-    with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof:
+    with profile(activities=[ProfilerActivity.CPU], record_shapes=True,
+                 profile_memory=True, with_flops=True, with_modules=True,
+                 with_stack=True,
+                 ) as prof:
         model(example_input)
         
-    print(prof.key_averages(group_by_input_shape=True).table(sort_by="cpu_time_total", row_limit=10))
+            
+    print(prof.key_averages(group_by_input_shape=False).table(sort_by="cuda_memory_usage",))
+    
+    bn_mods = get_bn_modules(model)
+    #print(f"BatchNorm modules in the model: {bn_mods}")
+    
+    print(f" {len(bn_mods)} BatchNorm modules in the model.")
+    wrn_flops = FlopCountAnalysis(model, example_input)
+    wrn_act = activations=ActivationCountAnalysis(model, example_input)
+    flops_table = flop_count_table(flops=wrn_flops, 
+                                    activations=wrn_act, 
+                                    )
+    print(f"FLOPS table for the  WRN model:\n{flops_table}")
+    print(f"total FLOPS for the  WRN model: {wrn_flops.total()}")
+    #print(f"FLOPS by modlue for the custom WRN model:\n{wrn_flops.by_module()}")
+    
+    
+    
+    
+    """
+    
+    From this analysis, batch Norm has low flops but high CPU total% hence would have a 
+    significant impact on the overall execution time / latency of the model. Thus,
+    Conv dominates the FLOPS but BatchNorm dominates the execution time / CPU overhead.
+    
+    This is likely because of the
+
+
+    """
