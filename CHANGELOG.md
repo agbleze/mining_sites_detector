@@ -1,8 +1,17 @@
 # CHANGELOG
 
+## v0.62.0 (2026-04-26)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+resolve ([`7e8e873`](https://github.com/agbleze/mining_sites_detector/commit/7e8e873e0c4e7ba970c3caff89b61446e57ac6d1))
+
 ## v0.61.0 (2026-04-25)
 
 ### Feature
+
+* feat: add densenet ([`21e64a8`](https://github.com/agbleze/mining_sites_detector/commit/21e64a83fcc2e0deb84e94465811aea5a4059049))
 
 * feat: add flops analysis ([`b923ab4`](https://github.com/agbleze/mining_sites_detector/commit/b923ab4b145c755cc51b608dc1740c5dfdfdec78))
 
