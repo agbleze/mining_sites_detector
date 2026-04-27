@@ -161,7 +161,8 @@ class TransBlock(nn.Module):
         """
         super().__init__()
         self.compression = compression
-        n_filters = int(in_channels * self.compression)
+        n_filters = round(in_channels * self.compression)
+        #print(f"Transition block: in_channels={in_channels}, compression={compression}, out_channels={n_filters}")
         #n_filters = int(int(x.shape[3]) * compression_rate)
         self.trans_block = self.get_transblock(n_filters)
         
@@ -180,16 +181,8 @@ class TransBlock(nn.Module):
         
         
     def forward(self, x):
-        # C = x.shape[1]
-        # n_filters = int(C * self.compression)
-        # trans_block = self.get_transblock(n_filters).to("cuda")
         x = self.trans_block(x)
         return x
-    
-        # x = self.bn1(x)
-        # x = self.conv1(x)
-        # x = self.avgpool(x)
-        # return x
     
     
 def group_densenet(n_blocks, growth_rate, stem_out_channels,
@@ -339,20 +332,20 @@ if __name__ == "__main__":
     example_input = torch.randn(1, 3, 224, 224,).to("cuda")# device="cuda")
     
     group_config = [grp1, grp2, grp3, grp4]
-    model = make_model(num_classes=100, group_config=group_config, device="cuda")
+    model = make_model(num_classes=1000, group_config=group_config, stem_out_channels=32, device="cuda")
     model.to("cuda")
     _ = model(example_input)
     model.apply(kernel_initializer)
     
-    #print(f"Custom DenseNet model summary:\n{summary(model, input_size=(3, 224, 224), device='cuda')}")
+    print(f"Custom DenseNet model summary:\n{summary(model, input_size=(3, 224, 224), device='cuda')}")
     
     densenet_flops = FlopCountAnalysis(model, example_input)
     densenet_act = activations=ActivationCountAnalysis(model, example_input)
     flops_table = flop_count_table(flops=densenet_flops, 
                                     activations=densenet_act, 
                                     )
-    print(f"FLOPS table for the  DenseNet model:\n{flops_table}")
-    print(f"total FLOPS for the  DenseNet model: {densenet_flops.total()}")
+    #print(f"FLOPS table for the  DenseNet model:\n{flops_table}")
+    #print(f"total FLOPS for the  DenseNet model: {densenet_flops.total()}")
     
     # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], 
     #              record_shapes=True, with_flops=True, with_modules=True,
