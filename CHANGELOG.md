@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.63.0 (2026-04-28)
+
+### Feature
+
+* feat: add XceptionStem ([`18396d3`](https://github.com/agbleze/mining_sites_detector/commit/18396d3ddca97754ff6f8a1376f29b991f3db86f))
+
+* feat: add imports ([`3ccfefb`](https://github.com/agbleze/mining_sites_detector/commit/3ccfefb74054948cdda47f32897f17b96f26b127))
+
+### Style
+
+* style: remove comments ([`80fcaa4`](https://github.com/agbleze/mining_sites_detector/commit/80fcaa445f2c43b213f689fd7f64f3b4c252e640))
+
 ## v0.62.0 (2026-04-26)
 
 ### Unknown
