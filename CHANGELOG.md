@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.64.0 (2026-04-29)
+
+### Feature
+
+* feat: update XceptionStem ([`5d6bf3a`](https://github.com/agbleze/mining_sites_detector/commit/5d6bf3a1cdec0e46798f26547017f726917ba05f))
+
 ## v0.63.0 (2026-04-28)
 
 ### Feature
