@@ -113,3 +113,113 @@ class EntryFlow(nn.Module):
         return x
 
 
+class MiddleFlowIdentityModule(nn.Module):
+    def __init__(self, in_channels, out_channels, module_depth=3
+                 ):
+        super()__init__()
+        
+        middleflow_module = []
+                
+        middleflow_module.append(nn.ReLU(inplace=True))
+        middleflow_module.append(DepthwiseSeparableConv(in_channels=in_channels, 
+                                                        out_channels=out_channels
+                                                        )
+                                 )
+        
+        
+        for i in range(module_depth-1):
+            middleflow_module.append(nn.ReLU(inplace=True))
+            middleflow_module.append(DepthwiseSeparableConv(in_channels=out_channels, 
+                                                            out_channels=out_channels
+                                                            )
+                       )
+            
+        self.middleflow_module = nn.Sequential(*middleflow_module)
+        
+    def forward(self, x):
+        shortcut = x
+        x = self.middleflow_module(x)
+        x += shortcut
+        return x
+        
+     
+     
+        
+        
+class MiddleFlowBlock(nn.Module):
+    def __init__(self, in_channels=728, out_channels=728, 
+                 module_depth=3, 
+                 n_blocks=8
+                 ):
+        super()__init__()
+        
+        blocks = [MiddleFlowIdentityModule(in_channels=in_channels, 
+                                         out_channels=out_channels, 
+                                         module_depth=module_depth
+                                         )
+                  for _ in range(n_blocks)
+                  ]
+        
+        self.middleflow_blocks = nn.Sequential(*blocks)
+        
+    def forward(self, x):
+        x = self.middleflow_blocks(x)
+        return x
+        
+        
+class ExitFlow(nn.Module):
+    def __init__():
+        super()__init__(self)
+        self.proj_conv = nn.Sequential(nn.LazyConv2d(output_channels=728,
+                                                     kernel_size=1,
+                                                     stride=2, bias=False)
+                                            nn.LazyBatchNorm2d()
+                                        )
+        self.separable_conv1 = DepthwiseSeparableConv(in_channels=728, out_channels=728)
+        self.separable_conv2 = DepthwiseSeparableConv(in_channels=728, out_channels=1024)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
+        
+        self.exitflow_module1 = nn.Sequential(nn.ReLU(inplace=True),
+                                                 self.separable_conv1,
+                                                 nn.ReLU(inplace=True),
+                                                 self.separable_conv2,
+                                                 self.maxpool
+                                                 )
+        
+        self.separable_conv3 = DepthwiseSeparableConv(in_channels=1024, out_channels=1536)
+        self.separableconv4 = DepthwiseSeparableConv(in_channels=2048, output_channels=2048)
+        
+        self.exitflow_module2 = nn.Sequential(self.separable_conv3, 
+                                              nn.ReLU(inplace=True), 
+                                              self.separableconv4,
+                                              nn.ReLU(inplace=True)
+                                              nn.AdaptiveAvgPool2d((1,1))
+                                              )
+        
+    def forward(self, x):
+        shortcut = self.proj_conv(x)
+        x = self. exitflow_module1(x)
+        x += shortcut
+        
+        x = self.exitflow_module2(x)
+        return x
+    
+    
+class Classifier(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        self.classifier = nn.Sequential(nn.Flatten(),
+                                        nn.LazyLinear(out_features=num_classes)
+                                        nn.Softmax(dim=1)
+                                        )
+        
+    def forward(self, x):
+        x = self.classifier(x)
+        return x
+    
+    
+    
+    
+    
+    
+        
