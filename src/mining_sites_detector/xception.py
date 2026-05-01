@@ -57,7 +57,7 @@ class DepthwiseSeparableConv(nn.Module):
     
     
 class ProjectionBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, stride=1,
+    def __init__(self, in_channels, out_channels,
                  skip_first_relu=False
                  ):
         super().__init__()
@@ -92,3 +92,24 @@ class ProjectionBlock(nn.Module):
         x += shortcut
         return x
         
+        
+class EntryFlow(nn.Module):
+    def __init__(self):
+        super().__init__(out_channels=[128, 256, 728])
+        
+        self.stem = XceptionStem()
+        blocks = []
+        for idx, chn in enumerate(out_channels):
+            block = ProjectionBlock(in_channels=64 if idx==0 else out_channels[idx-1],
+                                    out_channels=chn,
+                                    skip_first_relu=(idx==0)
+                                    )
+            blocks.append(block)
+        self.separable_blocks_with_skip = nn.Sequential(*blocks)
+        
+    def forward(self, x):
+        x = self.stem(x)
+        x = self.separable_blocks_with_skip(x)
+        return x
+
+
