@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## v0.65.0 (2026-05-02)
+
+### Feature
+
+* feat: add LazyDepthwiseConv2d ([`ab5f944`](https://github.com/agbleze/mining_sites_detector/commit/ab5f944486ffda457ae00bb513f31c63494a8a3d))
+
+* feat: add XceptionConfig ([`7903a63`](https://github.com/agbleze/mining_sites_detector/commit/7903a6395e09b2b92cd195860ca538019d2f237c))
+
+* feat: add make_model ([`1746342`](https://github.com/agbleze/mining_sites_detector/commit/17463426e1347be037e934b3cde416ed58694c07))
+
+* feat: add ExitFlow ([`5e6a140`](https://github.com/agbleze/mining_sites_detector/commit/5e6a140de36887d91c972aadf19905317cb36415))
+
+* feat: add EntryFlow ([`0f1ca18`](https://github.com/agbleze/mining_sites_detector/commit/0f1ca187e305302f9f89f5694b2c169b45fc2468))
+
+* feat: add DepthwiseSeparableConv ([`f60e917`](https://github.com/agbleze/mining_sites_detector/commit/f60e917b473984aa96d53b0fd8b048acdd61b3b7))
+
+### Fix
+
+* fix: add missing comma to ProjectionBlock ([`b10061d`](https://github.com/agbleze/mining_sites_detector/commit/b10061d4acba95f99e9251ea6f8247c0cd67c32c))
+
 ## v0.64.0 (2026-04-29)
 
 ### Feature
