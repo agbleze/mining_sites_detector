@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchsummary import summary
-
+from typing import NamedTuple
 
 
 class XceptionStem(nn.Module):
@@ -168,15 +168,16 @@ class MiddleFlowBlock(nn.Module):
         
         
 class ExitFlow(nn.Module):
-    def __init__():
-        super()__init__(self)
-        self.proj_conv = nn.Sequential(nn.LazyConv2d(output_channels=728,
+    def __init__(self):
+        super()__init__(in_channels=728, out_channels=1024)
+        self.proj_conv = nn.Sequential(nn.LazyConv2d(output_channels=out_channels,
                                                      kernel_size=1,
-                                                     stride=2, bias=False)
-                                            nn.LazyBatchNorm2d()
+                                                     stride=2, bias=False
+                                                     ),
+                                        nn.LazyBatchNorm2d()
                                         )
-        self.separable_conv1 = DepthwiseSeparableConv(in_channels=728, out_channels=728)
-        self.separable_conv2 = DepthwiseSeparableConv(in_channels=728, out_channels=1024)
+        self.separable_conv1 = DepthwiseSeparableConv(in_channels=in_channels, out_channels=in_channels)
+        self.separable_conv2 = DepthwiseSeparableConv(in_channels=in_channels, out_channels=out_channels)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
         
         self.exitflow_module1 = nn.Sequential(nn.ReLU(inplace=True),
@@ -186,7 +187,7 @@ class ExitFlow(nn.Module):
                                                  self.maxpool
                                                  )
         
-        self.separable_conv3 = DepthwiseSeparableConv(in_channels=1024, out_channels=1536)
+        self.separable_conv3 = DepthwiseSeparableConv(in_channels=out_channels, out_channels=1536)
         self.separableconv4 = DepthwiseSeparableConv(in_channels=2048, output_channels=2048)
         
         self.exitflow_module2 = nn.Sequential(self.separable_conv3, 
@@ -234,26 +235,38 @@ def kernel_initializer(m, kernel_initializer="he_normal"):
             nn.init.zeros_(m.bias)
                 
                 
-def make_model(num_classes, data, device="cuda"):
-    entryflow = EntryFlow()
-    middleflow = MiddleFlowBlock()
-    exitflow = ExitFlow()
-    classifier = Classifier(num_classes=10)
+def make_model(num_classes, data, config, device="cuda"):
+    entryflow = EntryFlow(out_channels=config.entryflow_out_channels)
+    middleflow = MiddleFlowBlock(in_channels=config.entryflow_out_channels[-1],
+                                 out_channels=config.entryflow_out_channels[-1],
+                                 module_depth=config.middleflow_module_depth,
+                                 n_blocks=config.middleflow_n_blocks
+                                 )
+    exitflow = ExitFlow(in_channels=config.entryflow_out_channels[-1])
+    classifier = Classifier(num_classes=config.num_classes)
     model = nn.Sequential(entryflow, middleflow, exitflow, classifier)   
     model.to(device)
     _ = model(data.to(device))
     model.apply(kernel_initializer)
     return model
-    
-                 
+
                 
-
+class XceptionConfig(NamedTuple):
+    num_classes: int
+    entryflow_out_channels: list = [128, 256, 728]
+    middleflow_module_depth: int = 3
+    middleflow_n_blocks: int = 8
 
 
     
-    
+config = XceptionConfig(num_classes=10,
+                        entryflow_out_channels=[128, 256, 728],
+                       middleflow_module_depth=3,
+                       middleflow_n_blocks=8
+                       )    
 data = torch.randn(1, 3, 299, 299)
-x = entry(data)
-x = middle(x)
-x = exit(x)    
+
+model = make_model(num_classes=10, data=data, config=config, device="cuda")
+
+
         
