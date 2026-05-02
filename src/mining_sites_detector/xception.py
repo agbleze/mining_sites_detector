@@ -63,7 +63,7 @@ class ProjectionBlock(nn.Module):
         super().__init__()
         
         self.proj_conv = nn.Sequential(nn.LazyConv2d(out_channels=out_channels,
-                                                     kernel_size=1,stride=2
+                                                     kernel_size=1,stride=2,
                                                      bias=False),
                                             nn.LazyBatchNorm2d()
                                             )
