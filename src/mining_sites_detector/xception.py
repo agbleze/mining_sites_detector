@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
-from torchsummary import summary
 from typing import NamedTuple
-
+from torchinfo import summary
 
 class XceptionStem(nn.Module):
     def __init__(self,):
@@ -28,18 +27,42 @@ class XceptionStem(nn.Module):
         x = self.conv2(x)
         return x
     
-    
+
+class LazyDepthwiseConv2d(nn.LazyConv2d):
+    def initialize_parameters(self, input):
+        # Let LazyConv2d infer in_channels and out_channels
+        super().initialize_parameters(input)
+
+        # Now that in_channels is known, set groups = in_channels
+        self.groups = self.in_channels
+
+        self.weight = nn.Parameter(torch.empty(self.in_channels, 1, 
+                                                *self.kernel_size, 
+                                                device=input.device,
+                                                dtype=input.dtype
+                                                )
+                                    )
+        
+        # Depthwise conv requires out_channels == in_channels
+        if self.out_channels != self.in_channels:
+            raise ValueError(
+                f"Depthwise conv requires out_channels == in_channels, "
+                f"got out={self.out_channels}, in={self.in_channels}"
+            )
+
 class DepthwiseSeparableConv(nn.Module):
-    def __init__(self, in_channels, out_channels, stride=1):
-        super().__init__(self)
+    def __init__(self, in_channels, out_channels, #groups, 
+                 stride=1):
+        super().__init__()
         
         self.depthwise_conv = nn.Sequential(
-            nn.LazyConv2d(out_channels=out_channels, kernel_size=3,
-                          stride=1, padding="same",
-                          groups=in_channels, bias=False
-                          ),
-            nn.LazyBatchNorm2d()
-            )
+                                            LazyDepthwiseConv2d(out_channels=in_channels, 
+                                                                kernel_size=3,
+                                                                stride=1, padding=1,
+                                                                bias=False
+                                                                ),
+                                            nn.LazyBatchNorm2d()
+                                            )
         
         self.pointwise_conv = nn.Sequential(nn.LazyConv2d(out_channels=out_channels, 
                                                         kernel_size=1,
@@ -48,7 +71,6 @@ class DepthwiseSeparableConv(nn.Module):
                                                         ),
                                             nn.LazyBatchNorm2d()
                                             )
-        
         
     def forward(self, x):
         x = self.depthwise_conv(x)
@@ -64,7 +86,8 @@ class ProjectionBlock(nn.Module):
         
         self.proj_conv = nn.Sequential(nn.LazyConv2d(out_channels=out_channels,
                                                      kernel_size=1,stride=2,
-                                                     bias=False),
+                                                     bias=False, padding=0
+                                                     ),
                                             nn.LazyBatchNorm2d()
                                             )
         self.relu = nn.ReLU(inplace=True)
@@ -74,13 +97,14 @@ class ProjectionBlock(nn.Module):
         self.separable_conv2 = DepthwiseSeparableConv(in_channels=out_channels,
                                                       out_channels=out_channels,
                                                       )
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         
         block = []
         if not skip_first_relu:
             block.append(nn.ReLU(inplace=True))
         block.extend([self.separable_conv1, 
-                      self.relu, self.separable_conv2, 
+                      self.relu, 
+                      self.separable_conv2, 
                       self.maxpool
                       ]
                      )
@@ -90,12 +114,11 @@ class ProjectionBlock(nn.Module):
         shortcut = self.proj_conv(x)
         x = self.block(x)
         x += shortcut
-        return x
-        
+        return x    
         
 class EntryFlow(nn.Module):
-    def __init__(self):
-        super().__init__(out_channels=[128, 256, 728])
+    def __init__(self, out_channels=[128, 256, 728]):
+        super().__init__()
         
         self.stem = XceptionStem()
         blocks = []
@@ -112,17 +135,18 @@ class EntryFlow(nn.Module):
         x = self.separable_blocks_with_skip(x)
         return x
 
-
+    
 class MiddleFlowIdentityModule(nn.Module):
-    def __init__(self, in_channels, out_channels, module_depth=3
+    def __init__(self, in_channels, out_channels,
+                 module_depth=3
                  ):
-        super()__init__()
+        super().__init__()
         
         middleflow_module = []
                 
         middleflow_module.append(nn.ReLU(inplace=True))
         middleflow_module.append(DepthwiseSeparableConv(in_channels=in_channels, 
-                                                        out_channels=out_channels
+                                                        out_channels=out_channels,
                                                         )
                                  )
         
@@ -130,9 +154,9 @@ class MiddleFlowIdentityModule(nn.Module):
         for i in range(module_depth-1):
             middleflow_module.append(nn.ReLU(inplace=True))
             middleflow_module.append(DepthwiseSeparableConv(in_channels=out_channels, 
-                                                            out_channels=out_channels
+                                                            out_channels=out_channels,
                                                             )
-                       )
+                                    )
             
         self.middleflow_module = nn.Sequential(*middleflow_module)
         
@@ -140,22 +164,18 @@ class MiddleFlowIdentityModule(nn.Module):
         shortcut = x
         x = self.middleflow_module(x)
         x += shortcut
-        return x
-        
-     
-     
-        
+        return x       
         
 class MiddleFlowBlock(nn.Module):
-    def __init__(self, in_channels=728, out_channels=728, 
+    def __init__(self, in_channels=728, out_channels=728,
                  module_depth=3, 
                  n_blocks=8
                  ):
-        super()__init__()
+        super().__init__()
         
         blocks = [MiddleFlowIdentityModule(in_channels=in_channels, 
                                          out_channels=out_channels, 
-                                         module_depth=module_depth
+                                         module_depth=module_depth,
                                          )
                   for _ in range(n_blocks)
                   ]
@@ -168,32 +188,41 @@ class MiddleFlowBlock(nn.Module):
         
         
 class ExitFlow(nn.Module):
-    def __init__(self):
-        super()__init__(in_channels=728, out_channels=1024)
-        self.proj_conv = nn.Sequential(nn.LazyConv2d(output_channels=out_channels,
+    def __init__(self, in_channels=728, out_channels=1024):
+        super().__init__()
+        self.proj_conv = nn.Sequential(nn.LazyConv2d(out_channels=out_channels,
                                                      kernel_size=1,
-                                                     stride=2, bias=False
+                                                     stride=2, bias=False,
+                                                     padding=0,
                                                      ),
                                         nn.LazyBatchNorm2d()
                                         )
-        self.separable_conv1 = DepthwiseSeparableConv(in_channels=in_channels, out_channels=in_channels)
-        self.separable_conv2 = DepthwiseSeparableConv(in_channels=in_channels, out_channels=out_channels)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.separable_conv1 = DepthwiseSeparableConv(in_channels=in_channels, 
+                                                      out_channels=in_channels,
+                                                      )
+        self.separable_conv2 = DepthwiseSeparableConv(in_channels=in_channels, 
+                                                      out_channels=out_channels,
+                                                      )
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         
         self.exitflow_module1 = nn.Sequential(nn.ReLU(inplace=True),
-                                                 self.separable_conv1,
-                                                 nn.ReLU(inplace=True),
-                                                 self.separable_conv2,
-                                                 self.maxpool
-                                                 )
+                                            self.separable_conv1,
+                                            nn.ReLU(inplace=True),
+                                            self.separable_conv2,
+                                            self.maxpool
+                                            )
         
-        self.separable_conv3 = DepthwiseSeparableConv(in_channels=out_channels, out_channels=1536)
-        self.separableconv4 = DepthwiseSeparableConv(in_channels=2048, output_channels=2048)
+        self.separable_conv3 = DepthwiseSeparableConv(in_channels=out_channels, 
+                                                      out_channels=1536,
+                                                      )
+        self.separable_conv4 = DepthwiseSeparableConv(in_channels=1536,
+                                                      out_channels=2048,
+                                                      )
         
         self.exitflow_module2 = nn.Sequential(self.separable_conv3, 
                                               nn.ReLU(inplace=True), 
-                                              self.separableconv4,
-                                              nn.ReLU(inplace=True)
+                                              self.separable_conv4,
+                                              nn.ReLU(inplace=True),
                                               nn.AdaptiveAvgPool2d((1,1))
                                               )
         
@@ -210,7 +239,7 @@ class Classifier(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         self.classifier = nn.Sequential(nn.Flatten(),
-                                        nn.LazyLinear(out_features=num_classes)
+                                        nn.LazyLinear(out_features=num_classes),
                                         nn.Softmax(dim=1)
                                         )
         
@@ -235,12 +264,12 @@ def kernel_initializer(m, kernel_initializer="he_normal"):
             nn.init.zeros_(m.bias)
                 
                 
-def make_model(num_classes, data, config, device="cuda"):
+def make_model(data, config, device="cuda"):
     entryflow = EntryFlow(out_channels=config.entryflow_out_channels)
     middleflow = MiddleFlowBlock(in_channels=config.entryflow_out_channels[-1],
                                  out_channels=config.entryflow_out_channels[-1],
                                  module_depth=config.middleflow_module_depth,
-                                 n_blocks=config.middleflow_n_blocks
+                                 n_blocks=config.middleflow_n_blocks,
                                  )
     exitflow = ExitFlow(in_channels=config.entryflow_out_channels[-1])
     classifier = Classifier(num_classes=config.num_classes)
@@ -258,15 +287,19 @@ class XceptionConfig(NamedTuple):
     middleflow_n_blocks: int = 8
 
 
+if __name__ == "__main__":
     
-config = XceptionConfig(num_classes=10,
-                        entryflow_out_channels=[128, 256, 728],
-                       middleflow_module_depth=3,
-                       middleflow_n_blocks=8
-                       )    
-data = torch.randn(1, 3, 299, 299)
+    config = XceptionConfig(num_classes=1000,
+                            entryflow_out_channels=[128, 256, 728],
+                            middleflow_module_depth=3,
+                            middleflow_n_blocks=8
+                            )    
+    data = torch.randn(1, 3, 299, 299)
 
-model = make_model(num_classes=10, data=data, config=config, device="cuda")
+    model = make_model(data=data, config=config, device="cuda")
+    
+    print(f"Custom Xception model summary:\n")
+    summary(model, input_data=data, device='cuda')
 
 
         
