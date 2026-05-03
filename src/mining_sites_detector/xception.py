@@ -51,8 +51,7 @@ class LazyDepthwiseConv2d(nn.LazyConv2d):
             )
 
 class DepthwiseSeparableConv(nn.Module):
-    def __init__(self, in_channels, out_channels, #groups, 
-                 stride=1):
+    def __init__(self, in_channels, out_channels):
         super().__init__()
         
         self.depthwise_conv = nn.Sequential(
@@ -299,7 +298,14 @@ if __name__ == "__main__":
     model = make_model(data=data, config=config, device="cuda")
     
     print(f"Custom Xception model summary:\n")
-    summary(model, input_data=data, device='cuda')
+    summary(model, input_data=data, device='cuda',
+            verbose=1,
+            mode="train",
+            col_names=["input_size", "output_size", "num_params",
+                       "mult_adds",
+                       ],
+            depth=3,
+            )
 
 
         
