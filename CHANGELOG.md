@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.65.1 (2026-05-03)
+
+### Fix
+
+* fix: remove unused stride param ([`bd31b6c`](https://github.com/agbleze/mining_sites_detector/commit/bd31b6ce68e722171d0ccda0d990b4058b2f56b0))
+
 ## v0.65.0 (2026-05-02)
 
 ### Feature
