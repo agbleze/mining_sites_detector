@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.66.0 (2026-05-04)
+
+### Feature
+
+* feat: add senet ([`aa05a87`](https://github.com/agbleze/mining_sites_detector/commit/aa05a87aae220f801270fce2e9abea3e673b7f3f))
+
 ## v0.65.1 (2026-05-03)
 
 ### Fix
