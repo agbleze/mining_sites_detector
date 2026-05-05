@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.67.0 (2026-05-05)
+
+### Feature
+
+* feat: add SenetStem ([`1c7699e`](https://github.com/agbleze/mining_sites_detector/commit/1c7699e6f6fb771b77bfea7a90e30db791e94e0f))
+
 ## v0.66.0 (2026-05-04)
 
 ### Feature
