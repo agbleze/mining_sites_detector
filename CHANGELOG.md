@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.68.0 (2026-05-06)
+
+### Feature
+
+* feat: add SequeezeExcitationBlock ([`6972ac8`](https://github.com/agbleze/mining_sites_detector/commit/6972ac890b74f818f288e22a230106ab149038e5))
+
 ## v0.67.0 (2026-05-05)
 
 ### Feature
