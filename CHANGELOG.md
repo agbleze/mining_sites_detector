@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.70.0 (2026-05-07)
+
+### Feature
+
+* feat: add ExcitationBlock ([`a45414c`](https://github.com/agbleze/mining_sites_detector/commit/a45414cb14e2838899d61007cddc27734cfd6aa3))
+
 ## v0.69.0 (2026-05-07)
 
 ### Feature
