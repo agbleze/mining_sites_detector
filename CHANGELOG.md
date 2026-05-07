@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.69.0 (2026-05-07)
+
+### Feature
+
+* feat: add reduction_ratio ([`2eb6f2f`](https://github.com/agbleze/mining_sites_detector/commit/2eb6f2f1c461a0fd596cc66da52d5cab9853ee63))
+
 ## v0.68.0 (2026-05-06)
 
 ### Feature
