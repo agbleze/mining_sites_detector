@@ -21,13 +21,13 @@ class SenetStem(nn.Module):
     
     
 class SequeezeExcitationBlock(nn.Module):
-    def __init__(self, r):
+    def __init__(self, reduction_ratio):
         super().__init__()
         self.global_avgpool = nn.AdaptiveAvgPool2d((1,1))
         # 1x1 x C/r
         # need to infer the number of channels in the input feature map 
         # to determine the output features for this layer
-        self.fc1 = nn.LazyLinear(out_features=r)
+        self.fc1 = nn.LazyLinear(out_features=reduction_ratio)
         self.relu = nn.ReLU()
         
         self.fc2 = nn.LazyLinear()
