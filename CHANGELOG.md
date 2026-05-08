@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.71.0 (2026-05-08)
+
+### Feature
+
+* feat: add SEResnetProjectionBlock ([`f09abdb`](https://github.com/agbleze/mining_sites_detector/commit/f09abdbb77c38d308e587ad0b86514444e61b795))
+
 ## v0.70.0 (2026-05-07)
 
 ### Feature
