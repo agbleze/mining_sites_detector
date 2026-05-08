@@ -73,3 +73,8 @@ class SqueezeExcitationBlock(nn.Module):
         x = x.unsqueeze(-1).unsqueeze(-1)
         x = shortcut * x
         return x
+    
+    
+class SEResnetProjectionBlock(nn.Module):
+    def __init__(self):
+        super().__init__()
