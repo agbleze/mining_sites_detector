@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.72.1 (2026-05-09)
+
+### Fix
+
+* fix: add stride param to group and learner ([`c9f094a`](https://github.com/agbleze/mining_sites_detector/commit/c9f094a4d0ed001c74dea35b6b74b575292a8b11))
+
 ## v0.72.0 (2026-05-09)
 
 ### Feature
