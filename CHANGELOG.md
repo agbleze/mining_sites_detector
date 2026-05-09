@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.71.1 (2026-05-09)
+
+### Fix
+
+* fix: update SEResnetProjectionBlock ([`4a4676d`](https://github.com/agbleze/mining_sites_detector/commit/4a4676dc2c49b84a8e3b4fa8e5549ea4c53833ee))
+
 ## v0.71.0 (2026-05-08)
 
 ### Feature
