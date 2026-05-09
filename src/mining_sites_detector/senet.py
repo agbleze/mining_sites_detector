@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
+from typing import Literal
 
+
+
+VARIANT_OPTIONS = ["standard", "pre", "post", "identity", "enclose"]
 
 class SenetStem(nn.Module):
     def __init__(self, ):
@@ -75,6 +79,160 @@ class SqueezeExcitationBlock(nn.Module):
         return x
     
     
-class SEResnetProjectionBlock(nn.Module):
-    def __init__(self):
+class SEResNextProjectionBlock(nn.Module):
+    def __init__(self, filters_in, filters_out, cardinality=32, reduction_ratio=16,
+                 stride=1,
+                 variant: Literal["standard", "pre", "post", "identity"] = "standard"
+                 ):
         super().__init__()
+        if variant not in VARIANT_OPTIONS:
+            raise ValueError(f"Invalid variant option: {variant}. Must be one of {VARIANT_OPTIONS}")
+        
+        self.variant = variant
+        
+        self.projection_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_out, 
+                                                kernel_size=1,
+                                                stride=stride, 
+                                                padding="same", 
+                                                bias=False
+                                                ),
+                                nn.LazyBatchNorm2d(),
+                                )
+        
+        self.reduction_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_in, 
+                                                  kernel_size=1, stride=1, 
+                                                  padding="same", 
+                                                  bias=False
+                                                  ),
+                                    nn.LazyBatchNorm2d(),
+                                    nn.ReLU()
+                                    )
+        
+        self.group_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_in, 
+                                                 kernel_size=3, stride=stride, 
+                                                 padding="same", bias=False, 
+                                                 groups=cardinality
+                                                ),
+                                        nn.LazyBatchNorm2d(),
+                                        nn.ReLU()
+                                    )
+        
+        self.expansion_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_out, 
+                                                  kernel_size=1, stride=1, 
+                                                  padding="same", bias=False
+                                                  ),
+                                    nn.LazyBatchNorm2d(),
+                                    )
+        
+        self.act = nn.ReLU()
+        self.residual_block = nn.Sequential(self.reduction_conv,
+                                            self.group_conv,
+                                            self.expansion_conv
+                                            )
+        self.se_block = SqueezeExcitationBlock(reduction_ratio=reduction_ratio)
+        
+    def forward(self, x):
+        shortcut = self.projection_conv(x)
+        
+        if self.variant == "standard":
+            x = self.residual_block(x)
+            x = self.se_block(x)
+            x += shortcut
+            
+        elif self.variant == "pre":
+            x = self.se_block(x)
+            x = self.residual_block(x)
+            x += shortcut
+            
+        elif self.variant == "post":
+            x = self.residual_block(x)
+            x += shortcut
+            x = self.se_block(x)
+            
+        elif self.variant == "identity":
+            x_se = self.se_block(x)
+            x_residual = self.residual_block(x)
+            x = x_se + x_residual
+            
+        x = self.act(x)    
+        return x
+    
+    
+        
+class SEResNextIdentityBlock(nn.Module):
+    def __init__(self, filters_in, filters_out, cardinality=32, reduction_ratio=16,
+                 variant: Literal["standard", "pre", "post", "identity", "enclose"] = "standard"
+                 ):
+        super().__init__()
+        
+        if variant not in VARIANT_OPTIONS:
+            raise ValueError(f"Invalid variant option: {variant}. Must be one of {VARIANT_OPTIONS}")
+        
+        self.variant = variant
+        
+        self.reduction_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_in,
+                                                  kernel_size=1, stride=1,
+                                                  padding="same", bias=False,
+                                                  ),
+                                    nn.LazyBatchNorm2d(),
+                                    nn.ReLU()
+                                    )
+        self.group_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_in,
+                                                      kernel_size=3,
+                                                      stride=1,
+                                                      padding="same",
+                                                      bias=False,
+                                                      groups=cardinality
+                                                      ),
+                                        nn.LazyBatchNorm2d(),
+                                        nn.ReLU()
+                                        )
+        
+        self.expansion_conv = nn.Sequential(nn.LazyConv2d(out_channels=filters_out,
+                                                       kernel_size=1, stride=1,
+                                                       padding="same", bias=False
+                                                       ),
+                                         nn.LazyBatchNorm2d(),
+                                         )
+        
+        self.act = nn.ReLU()
+        
+        self.residual_block = nn.Sequential(self.reduction_conv,
+                                            self.group_conv,
+                                            self.expansion_conv
+                                            )
+        self.se_block = SqueezeExcitationBlock(reduction_ratio=reduction_ratio)
+        
+        
+    def forward(self, x):
+        shortcut = x
+        
+        if self.variant == "standard":
+            x = self.residual_block(x)
+            x = self.se_block(x)
+            x += shortcut
+            
+        elif self.variant == "pre":
+            x = self.se_block(x)
+            x = self.residual_block(x)
+            x += shortcut
+            
+        elif self.variant == "post":
+            x = self.residual_block(x)
+            x += shortcut
+            x = self.se_block(x)
+            
+        elif self.variant == "identity":
+            x_se = self.se_block(x)
+            x_residual = self.residual_block(x)
+            x = x_se + x_residual
+            
+        elif self.variant == "enclose":
+            x = self.reduction_conv(x)
+            x = self.group_conv(x)
+            x = self.se_block(x)
+            x = self.expansion_conv(x)
+            x += shortcut
+            
+        x = self.act(x)    
+        return x
