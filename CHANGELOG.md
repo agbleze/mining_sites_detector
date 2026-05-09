@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.72.0 (2026-05-09)
+
+### Feature
+
+* feat: add SEResNextGroupsConfig ([`0559487`](https://github.com/agbleze/mining_sites_detector/commit/05594876737f2c3b45c2d4494d06aa13e885b98d))
+
 ## v0.71.1 (2026-05-09)
 
 ### Fix
