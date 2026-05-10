@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.72.2 (2026-05-10)
+
+### Fix
+
+* fix: update identity integration of SE ([`139f08e`](https://github.com/agbleze/mining_sites_detector/commit/139f08ebb918f795165291156fa5cfc1da11c165))
+
 ## v0.72.1 (2026-05-09)
 
 ### Fix
