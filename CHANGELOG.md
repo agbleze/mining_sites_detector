@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.73.0 (2026-05-10)
+
+### Feature
+
+* feat: add mobilenet ([`c989972`](https://github.com/agbleze/mining_sites_detector/commit/c989972dd7fcfbe9380f1b29a5573e7313eced6a))
+
 ## v0.72.2 (2026-05-10)
 
 ### Fix

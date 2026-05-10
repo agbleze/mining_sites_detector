@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mining_sites_detector"
-version = "0.72.2"
+version = "0.73.0"
 description = "Codebase for training model on sentinel 2 data to detect mining sites"
 authors = ["agbleze"]
 license = "MIT"
@@ -20,6 +20,10 @@ sphinx-autoapi = "^3.3.2"
 sphinx-rtd-theme = "^2.0.0"
 sphinx = "7.4.7"
 
+[tool.poetry.scripts]
+miner = "mining_sites_detector.run_trainer:main"
+
+
 [tool.semantic_release]
 version_toml = [
     "pyproject.toml:tool.poetry.version",
@@ -30,15 +34,10 @@ build_command = "pip install poetry && poetry build"
 [tool.semantic_release.branch.main]
 changelog_file = "CHANGELOG.md"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-miner = "mining_sites_detector.run_trainer:main"
 
 [tool.semantic_release.remote.token]
 env = "GITHUB_TOKEN"
+
 
 [tool.semantic_release.commit_author]
 env = "GIT_COMMIT_AUTHOR"
@@ -47,3 +46,8 @@ default = "semantic-release <auto-build>"
 [tool.semantic_release.publish]
 upload_to_vcs_release=true
 dist_glob_patterns = ["dist/"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
