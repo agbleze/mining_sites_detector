@@ -45,8 +45,7 @@ class SELazyLinear(nn.LazyLinear):
         super().__init__(out_features=None, bias=bias)
         self.reduction_ratio = reduction_ratio
         self.mode = mode
-        self.target_out = target_out  # used for fc2 to know final C
-        #print(f"out_features: {self.out_features}")
+        self.target_out = target_out  
 
     def initialize_parameters(self, input):
         x = input[0] if isinstance(input, (list, tuple)) else input
@@ -89,19 +88,6 @@ class ExcitationBlock(nn.Module):
         if getattr(self.fc1, "in_features", None) is not None and self.fc2.target_out is None:
             self.fc2.target_out = self.fc1.in_features
         
-    # def initialize_parameters(self, input):
-    #     print(f"Initializing Excitation block parameters with input shape: {input.shape}")
-    #     x = input[0]
-    #     C = int(x.shape[1])
-    #     print(f"Excitation block input channels: {C}")
-    #     reduced_channels = C // self.reduction_ratio
-    #     print(f"Excitation block reduced channels: {reduced_channels}")
-        
-    #     self.fc1.out_features = reduced_channels
-    #     self.fc2.out_features = C
-        
-    #     super().initialize_parameters(input)
-        
     def forward(self, x):
         x = self.fc1(x)
         x = self.relu(x)
@@ -125,10 +111,19 @@ class SqueezeExcitationBlock(nn.Module):
     
     
 class SEResNextProjectionBlock(nn.Module):
-    def __init__(self, bottleneck_width, out_channels, cardinality=32, reduction_ratio=16,
+    """
+    """
+    def __init__(self, bottleneck_width, out_channels, cardinality=32, 
+                 reduction_ratio=16,
                  stride=1,
                  variant: Literal["standard", "pre", "post", "identity", "enclose"] = "standard"
                  ):
+        """
+        
+        Args:
+            bottleneck_width: 
+        
+        """
         super().__init__()
         if variant not in VARIANT_OPTIONS:
             raise ValueError(f"Invalid variant option: {variant}. Must be one of {VARIANT_OPTIONS}")
@@ -140,7 +135,6 @@ class SEResNextProjectionBlock(nn.Module):
         self.projection_conv = nn.Sequential(nn.LazyConv2d(out_channels=out_channels, 
                                                 kernel_size=1,
                                                 stride=stride, 
-                                                #padding="same", 
                                                 bias=False
                                                 ),
                                 nn.LazyBatchNorm2d(),
@@ -198,10 +192,17 @@ class SEResNextProjectionBlock(nn.Module):
             x = self.se_block(x)
             
         elif self.variant == "identity":
-            x_se = self.se_block(x)
+            x_se = self.se_block(shortcut)
             x_residual = self.residual_block(x)
             x = x_se + x_residual
-            
+        
+        elif self.variant == "enclose":
+            x = self.reduction_conv(x)
+            x = self.group_conv(x)
+            x = self.se_block(x)
+            x = self.expansion_conv(x)
+            x += shortcut
+                
         x = self.act(x)    
         return x
         
@@ -209,6 +210,7 @@ class SEResNextIdentityBlock(nn.Module):
     def __init__(self, bottleneck_width, out_channels, cardinality=32, reduction_ratio=16,
                  variant: Literal["standard", "pre", "post", "identity", "enclose"] = "standard"
                  ):
+        
         super().__init__()
         
         if variant not in VARIANT_OPTIONS:
@@ -271,7 +273,7 @@ class SEResNextIdentityBlock(nn.Module):
             x = self.se_block(x)
             
         elif self.variant == "identity":
-            x_se = self.se_block(x)
+            x_se = self.se_block(shortcut)
             x_residual = self.residual_block(x)
             x = x_se + x_residual
             
@@ -367,10 +369,10 @@ if __name__ == "__main__":
                 ResNextBlocksConfig(out_channels=2048, num_blocks=3)
                 ]
 
-    group_config = SEResNextGroupsConfig(cardinality=32, 
-                                         bottleneck_width=4, 
+    group_config = SEResNextGroupsConfig(cardinality=16, 
+                                         bottleneck_width=8, 
                                          reduction_ratio=32,
-                                        variant="standard", 
+                                        variant="enclose", 
                                         block_config=blocks
                                         )
     
