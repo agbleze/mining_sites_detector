@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.73.1 (2026-05-11)
+
+### Fix
+
+* fix: add stride in only first block of group to produce mobilenet arch replica ([`d27f8c2`](https://github.com/agbleze/mining_sites_detector/commit/d27f8c247f47d32dccef5b518c95f80488a1ecf4))
+
 ## v0.73.0 (2026-05-10)
 
 ### Feature
