@@ -23,4 +23,10 @@ class MobileNet_V2(nn.Module):
         pass
     
     
+class MobileNetBlock_V2(nn.Module):
+    def __init__(self, out_channels, expansion_ratio):
+        super().__init__()
+        self.expansion_ratio = expansion_ratio
+        
+        
     
