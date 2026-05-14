@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.75.0 (2026-05-14)
+
+### Feature
+
+* feat: add MobileNetBlock_V2 ([`9bc90f0`](https://github.com/agbleze/mining_sites_detector/commit/9bc90f0fd726a35b66a8b3e0729b01bc1ade55bd))
+
+### Unknown
+
+* feat. add MobileNetStemV2 ([`c1a4c87`](https://github.com/agbleze/mining_sites_detector/commit/c1a4c874f12ea6eb0b39e609920e06392c27b05d))
+
 ## v0.74.0 (2026-05-12)
 
 ### Feature
