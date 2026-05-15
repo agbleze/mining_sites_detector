@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.77.0 (2026-05-15)
+
+### Feature
+
+* feat: add MobileNetV2LastLearnerBlock2 ([`c68458e`](https://github.com/agbleze/mining_sites_detector/commit/c68458ef33332aa7f24febe6bef7d0d70ad8c0e5))
+
 ## v0.76.0 (2026-05-15)
 
 ### Feature
