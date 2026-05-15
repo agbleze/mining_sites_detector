@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from torchinfo import summary
 from typing import NamedTuple, List
-from dataclasses import dataclass
 from copy import deepcopy
 
 
@@ -63,10 +62,13 @@ class MobileNetV2Stem(nn.Module):
                                   bias=False,
                                   stride=2
                                   )
-        
+        self.bn1 = nn.LazyBatchNorm2d()
+        self.relu6_1 = nn.ReLU6()
         
     def forward(self, x):
         x = self.conv(x)
+        x = self.bn1(x)
+        x = self.relu6_1(x)
         return x
         
 
@@ -75,75 +77,101 @@ class MobileNetResidualBlock_V2(nn.Module):
         super().__init__()
         
         out_channels = int(width_multiplier * out_channels)
-        expanded_channels = int(out_channels * expansion_rate)
+        expanded_channels = int(out_channels * expansion_rate) if expansion_rate else out_channels
         self.conv1x1 = nn.LazyConv2d(out_channels=expanded_channels,
                                      kernel_size=1,
                                      bias=False,
                                      stride=1
                                      )
+        self.bn1 = nn.LazyBatchNorm2d()
         self.relu6_1 = nn.ReLU6()
         self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None,
                                                   kernel_size=3,
                                                   bias=False,
-                                                  padding=1
+                                                  padding=1,
+                                                  stride=1,
                                                   )
+        self.bn2 = nn.LazyBatchNorm2d()
         self.relu6_2 = nn.ReLU6()
         
         self.pointwise_conv = nn.LazyConv2d(out_channels=out_channels,
                                             kernel_size=1,
                                             bias=False
                                             )
+        self.bn3 = nn.LazyBatchNorm2d()
         
     def forward(self, x):
         shortcut = x
         x = self.conv1x1(x)
+        x = self.bn1(x)
         x = self.relu6_1(x)
         
         x = self.depthwise_conv(x)
+        x = self.bn2(x)
         x = self.relu6_2(x)
         x = self.pointwise_conv(x)
-        
+        x = self.bn3(x)
         x += shortcut
         return x
     
     
 class MobileNetNonResidualBlock_V2(nn.Module):
-    def __init__(self, out_channels, width_multiplier, expansion_rate):
+    def __init__(self, out_channels, width_multiplier, expansion_rate, stride=None):
         super().__init__()
         out_channels = int(out_channels * width_multiplier)
         
-        expanded_channels = int(out_channels * expansion_rate)
+        expanded_channels = int(out_channels * expansion_rate) if expansion_rate else out_channels
         
         self.expansion_conv = nn.LazyConv2d(out_channels=expanded_channels,
                                             kernel_size=1,
                                             bias=False,
                                             )
+        self.bn1 = nn.LazyBatchNorm2d()
         self.relu6_1 =nn.ReLU6()
         
         self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None,
                                                   kernel_size=3,
-                                                  stride=2,
+                                                  stride=2 if not stride else stride,
                                                   padding=1,
                                                   bias=False
                                                   )
+        self.bn2 = nn.LazyBatchNorm2d()
         self.relu6_2 = nn.ReLU6()
         
         self.pointwise_conv = nn.LazyConv2d(out_channels=out_channels,
                                             kernel_size=1,
                                             bias=False
                                             )
+        self.bn3 = nn.LazyBatchNorm2d()
         
     def forward(self, x):
         x = self.expansion_conv(x)
+        x = self.bn1(x)
         x = self.relu6_1(x)
         
         x = self.depthwise_conv(x)
+        x = self.bn2(x)
         x = self.relu6_2(x)
         x = self.pointwise_conv(x)
+        x = self.bn3(x)
         return x
         
 
+class MobileNetV2LastLearnerBlock(nn.Module):
+    def __init__(self, out_channels, **kwargs
+                 ):
+        super().__init__()
+        self.last_learner_conv = nn.LazyConv2d(kernel_size=1,
+                                               out_channels=out_channels,
+                                               bias=False
+                                               )
+        self.bn1 = nn.LazyBatchNorm2d()
 
+    def forward(self, x):
+        x = self.last_learner_conv(x)
+        x = self.bn1(x)
+        return x
+    
 class Classifier(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
@@ -159,20 +187,32 @@ class Classifier(nn.Module):
         x = self.softmax(x)
         return x
 
-def group(*, num_blocks, out_channels, width_multiplier, expansion_rate, **kwargs):
+def group(*, num_blocks, out_channels, width_multiplier, expansion_rate, 
+          first_layer_stride,
+          **kwargs
+          ):
     
     grp_blks = []
     for i in range(num_blocks):
-        if i == 0:
+        if num_blocks == 1 and i == 0:
+            blk = MobileNetNonResidualBlock_V2(out_channels=out_channels,
+                                               width_multiplier=width_multiplier,
+                                               expansion_rate=expansion_rate,
+                                               stride=first_layer_stride, #1
+                                               )
+            
+            
+        elif i == 0 and num_blocks > 1:    
+            blk = MobileNetNonResidualBlock_V2(out_channels=out_channels,
+                                               width_multiplier=width_multiplier,
+                                               expansion_rate=expansion_rate,
+                                               stride=first_layer_stride #2
+                                               )
+        else:    
             blk = MobileNetResidualBlock_V2(out_channels=out_channels,
                                       width_multiplier=width_multiplier,
                                       expansion_rate=expansion_rate
                                       )
-        else:
-            blk = MobileNetNonResidualBlock_V2(out_channels=out_channels,
-                                               width_multiplier=width_multiplier,
-                                               expansion_rate=expansion_rate
-                                               )
         grp_blks.append(blk)
         
     return nn.Sequential(*grp_blks)
@@ -180,7 +220,8 @@ def group(*, num_blocks, out_channels, width_multiplier, expansion_rate, **kwarg
 
 class BlockConfig(NamedTuple):
     out_channels: int
-    num_blocks: int        
+    num_blocks: int 
+    first_layer_stride: int       
     
 class MobileNetV2GroupConfig(NamedTuple):
     width_multiplier: float
@@ -191,17 +232,22 @@ class MobileNetV2GroupConfig(NamedTuple):
     
 def learner(configs: MobileNetV2GroupConfig):
     learner_groups = []
+    last_grp_idx = len(configs.block_config) -1
+    
     for idx, conf in enumerate(configs.block_config):
-        if idx == 0:
-            config_0 = deepcopy(configs)._asdict()
-            config_0["expansion_rate"] = 1
-        
-            grp = group(**config_0, **conf._asdict())
+        if idx == last_grp_idx:
+            grp = MobileNetV2LastLearnerBlock(**configs._asdict(), **conf._asdict())
             
-            learner_groups.append(grp)
-        else:
-            grp = group(**configs._asdict(), **conf._asdict())
-            learner_groups.append(grp)
+        _config = deepcopy(configs)._asdict()
+        if idx == 0:
+            _config["expansion_rate"] = 1
+        
+            grp = group(**_config, **conf._asdict())
+            
+        elif idx != last_grp_idx:
+            grp = group(**_config, **conf._asdict())
+        
+        learner_groups.append(grp)
             
     return nn.Sequential(*learner_groups)
     
@@ -216,14 +262,14 @@ def make_model(num_classes, learner_config, device="cuda"):
     
     
 if __name__ == "__main__":
-    block_config = [BlockConfig(out_channels=16, num_blocks=1),
-                    BlockConfig(out_channels=24, num_blocks=2),
-                    BlockConfig(out_channels=32, num_blocks=3),
-                    BlockConfig(out_channels=64, num_blocks=4),
-                    BlockConfig(out_channels=96, num_blocks=3),
-                    BlockConfig(out_channels=160, num_blocks=3),
-                    BlockConfig(out_channels=320, num_blocks=1),
-                    BlockConfig(out_channels=1280, num_blocks=1)
+    block_config = [BlockConfig(out_channels=16, num_blocks=1, first_layer_stride=1),
+                    BlockConfig(out_channels=24, num_blocks=2, first_layer_stride=2),
+                    BlockConfig(out_channels=32, num_blocks=3, first_layer_stride=2),
+                    BlockConfig(out_channels=64, num_blocks=4, first_layer_stride=2),
+                    BlockConfig(out_channels=96, num_blocks=3, first_layer_stride=1),
+                    BlockConfig(out_channels=160, num_blocks=3, first_layer_stride=2),
+                    BlockConfig(out_channels=320, num_blocks=1, first_layer_stride=1),
+                    BlockConfig(out_channels=1280, num_blocks=1, first_layer_stride=1)
                     ]
     
     
@@ -233,7 +279,7 @@ if __name__ == "__main__":
                                             )
     
     device = "cuda"
-    data = torch.randn((3, 3, 224, 224)).to(device)
+    data = torch.randn((1, 3, 224, 224)).to(device)
     model = make_model(num_classes=1000, learner_config=learner_config,
                        device=device
                        )
