@@ -115,7 +115,7 @@ class MobileNetResidualBlockV2(nn.Module):
         return x
     
     
-class MobileNetNonResidualBlock_V2(nn.Module):
+class MobileNetNonResidualBlockV2(nn.Module):
     def __init__(self, out_channels, width_multiplier, expansion_rate, stride=None):
         super().__init__()
         out_channels = int(out_channels * width_multiplier)
