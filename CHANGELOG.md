@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.78.0 (2026-05-16)
+
+### Feature
+
+* feat: add MobileNetV3Stem ([`1925b03`](https://github.com/agbleze/mining_sites_detector/commit/1925b033e23888e3b81db229df58aa34b418d0b4))
+
 ## v0.77.1 (2026-05-16)
 
 ### Fix
