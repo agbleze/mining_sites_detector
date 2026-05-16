@@ -195,7 +195,7 @@ def group(*, num_blocks, out_channels, width_multiplier, expansion_rate,
     grp_blks = []
     for i in range(num_blocks):
         if num_blocks == 1 and i == 0:
-            blk = MobileNetNonResidualBlock_V2(out_channels=out_channels,
+            blk = MobileNetNonResidualBlockV2(out_channels=out_channels,
                                                width_multiplier=width_multiplier,
                                                expansion_rate=expansion_rate,
                                                stride=first_layer_stride, #1
@@ -203,13 +203,13 @@ def group(*, num_blocks, out_channels, width_multiplier, expansion_rate,
             
             
         elif i == 0 and num_blocks > 1:    
-            blk = MobileNetNonResidualBlock_V2(out_channels=out_channels,
+            blk = MobileNetNonResidualBlockV2(out_channels=out_channels,
                                                width_multiplier=width_multiplier,
                                                expansion_rate=expansion_rate,
                                                stride=first_layer_stride #2
                                                )
         else:    
-            blk = MobileNetResidualBlock_V2(out_channels=out_channels,
+            blk = MobileNetResidualBlockV2(out_channels=out_channels,
                                       width_multiplier=width_multiplier,
                                       expansion_rate=expansion_rate
                                       )
