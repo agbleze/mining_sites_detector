@@ -72,7 +72,7 @@ class MobileNetV2Stem(nn.Module):
         return x
         
 
-class MobileNetResidualBlock_V2(nn.Module):
+class MobileNetResidualBlockV2(nn.Module):
     def __init__(self, out_channels, width_multiplier, expansion_rate):
         super().__init__()
         
