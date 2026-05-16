@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.77.1 (2026-05-16)
+
+### Fix
+
+* fix: change MobileNetNonResidualBlock_V2 to MobileNetNonResidualBlockV2 ([`a3bbb72`](https://github.com/agbleze/mining_sites_detector/commit/a3bbb72808fadd886a054fc457a9b8141e495903))
+
+* fix: change MobileNetNonResidualBlock_V2 to MobileNetNonResidualBlockV2 ([`36ca943`](https://github.com/agbleze/mining_sites_detector/commit/36ca94384411a24b252e58722895cd8da28fb9ae))
+
+* fix: change MobileNetResidualBlock_V2 to MobileNetResidualBlockV2 ([`5750414`](https://github.com/agbleze/mining_sites_detector/commit/57504141afafcc4d0acde4905a2f9228f6713b57))
+
 ## v0.77.0 (2026-05-15)
 
 ### Feature
