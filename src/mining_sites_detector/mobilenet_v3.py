@@ -8,6 +8,17 @@ NON_LINEARITY_VALUES = ["relu", "hswish"]
 KERNEL_SIZE_VALUES = ["3x3", "5x5"]
 
 
+def kernel_initializer(m, kernel_initializer="he_normal"):
+    if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+        if kernel_initializer == "he_normal":
+            nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
+        elif kernel_initializer == "glorot_uniform":
+            nn.init.xavier_uniform_(m.weight)
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+
+
+
 class LazyDepthwiseConv2d(nn.LazyConv2d):
     def initialize_parameters(self, input):
         x = input[0] if isinstance(input, (tuple, list)) else input
@@ -34,7 +45,7 @@ class LazyDepthwiseConv2d(nn.LazyConv2d):
         
 
 class MobileNetV3Stem(nn.Module):
-    def __init__(self, out_channels):
+    def __init__(self, out_channels=16):
         super().__init__()
         
         self.conv = nn.LazyConv2d(kernel_size=3, out_channels=out_channels,
@@ -317,19 +328,24 @@ class BlockConfig(NamedTuple):
     out_channels: int
     non_linearity: Literal[NON_LINEARITY_VALUES]    
     use_squeeze_excitation: bool
-    invented_residual: bool = True
-    batch_norm = True
     expansion_sizes: List
+    strides: int
+    depthwiseconv_kernel_size: Literal["3x3", "5x5"]
+    invented_residual: bool = True
+    batch_norm: bool = True
+    
+    
+    
     
 class MobileNetV3GroupConfig(NamedTuple):
     width_multiplier: int
-    block_config: List(BlockConfig)
+    block_config: List[BlockConfig]
     
     
 def group(*, out_channels, width_multiplier,
           expansion_sizes, non_linearity,
           use_squeeze_excitation,
-          num_blocks, stride,
+          num_blocks, strides,
           **kwargs,
           ):
     blocks = []
@@ -389,20 +405,78 @@ def learner(configs):
             grp_blks.append(group(**conf._asdict(), **configs._asdict()))
     return nn.Sequential(*grp_blks)            
 
+
+def make_model(num_classes, learner_configs, data, device="cuda", 
+               initializer_type="he_normal"
+               ):
+    stem = MobileNetV3Stem()
+    learner_module = learner(configs=learner_configs)
+    classifier = Classifier(num_classes=num_classes)
+    model = nn.Sequential(stem, learner_module, classifier).to(device)
+    data.to(device)
+    _ = model(data)
+    model.apply(kernel_initializer(kernel_initializer=initializer_type))
+    return model
     
-block_config = [BlockConfig(out_channels=16, num_blocks=1, non_linearity="relu", use_squeeze_excitation=False, expansion_sizes=[16]),
-                BlockConfig(out_channels=24, num_blocks=2, non_linearity="relu", use_squeeze_excitation=False, expansion_sizes=[64, 72]),
-                BlockConfig(out_channels=40, num_blocks=3, non_linearity="relu", use_squeeze_excitation=False, expansion_sizes=[72, 120, 120]),
-                BlockConfig(out_channels=80, num_blocks=4, non_linearity="hswish", use_squeeze_excitation=False, expansion_sizes=[240, 200, 184, 184]),
-                BlockConfig(out_channels=112, num_blocks=2, non_linearity="hswish", use_squeeze_excitation=True, expansion_sizes=[480, 672]),
-                BlockConfig(out_channels=160, num_blocks=3, non_linearity="hswish", use_squeeze_excitation=True, expansion_sizes=[672, 960, 960]),
-                BlockConfig(invented_residual=False, out_channels=960, num_blocks=1, non_linearity="hswish", use_squeeze_excitation=False, expansion_sizes=[None]),
-                BlockConfig(invented_residual=False, out_channels=1280, num_blocks=1, non_linearity="hswish", use_squeeze_excitation=False,batch_norm=False, expansion_sizes=[None])
+
+
+
+block_config = [BlockConfig(out_channels=16, num_blocks=1, non_linearity="relu", 
+                            use_squeeze_excitation=False, expansion_sizes=[16], 
+                            depthwiseconv_kernel_size="3x3",
+                            strides=[1]),
+                BlockConfig(out_channels=24, depthwiseconv_kernel_size="3x3", 
+                            num_blocks=2, non_linearity="relu", 
+                            use_squeeze_excitation=False, expansion_sizes=[64, 72],
+                            strides=[2, 1]
+                            ),
+                BlockConfig(out_channels=40, depthwiseconv_kernel_size="5x5", num_blocks=3, 
+                            non_linearity="relu", use_squeeze_excitation=False, 
+                            expansion_sizes=[72, 120, 120],
+                            strides=[2,1,1]
+                            ),
+                BlockConfig(out_channels=80, depthwiseconv_kernel_size="3x3", num_blocks=4, 
+                            non_linearity="hswish", use_squeeze_excitation=False, 
+                            expansion_sizes=[240, 200, 184, 184],
+                            strides=[2, 1, 1, 1]
+                            ),
+                BlockConfig(out_channels=112, depthwiseconv_kernel_size="3x3", num_blocks=2, 
+                            non_linearity="hswish", use_squeeze_excitation=True, 
+                            expansion_sizes=[480, 672],
+                            strides=[1, 1]
+                            ),
+                BlockConfig(out_channels=160, depthwiseconv_kernel_size="5x5", num_blocks=3, 
+                            non_linearity="hswish", use_squeeze_excitation=True, 
+                            expansion_sizes=[672, 960, 960],
+                            strides=[2, 1, 1]
+                            ),
+                BlockConfig(invented_residual=False, depthwiseconv_kernel_size=None, out_channels=960, 
+                            num_blocks=1, non_linearity="hswish", use_squeeze_excitation=False, 
+                            expansion_sizes=[None],
+                            strides=[1]),
+                BlockConfig(invented_residual=False, depthwiseconv_kernel_size=None, out_channels=1280, 
+                            num_blocks=1, non_linearity="hswish", use_squeeze_excitation=False,
+                            batch_norm=False, expansion_sizes=[None],
+                            strides=[1]
+                            )
                 ]
                 
  
 group_config = MobileNetV3GroupConfig(width_multiplier=1, block_config=block_config) 
 #%%
 
-184 / 80
-# %%
+if __name__ == "__main__":
+    device="cuda"
+    data = torch.randn(3, 3, 224, 223).to(device)
+    model = make_model(num_classes=1000, learner_configs=group_config, 
+                       data=data,
+                       device=device,
+                       initializer_type="he_normal"
+                       )
+    
+    summary(mode=model, input_data=data, depth=4,
+            col_names=["input_size", "output_size", "num_params", "mult_adds"]
+            )
+
+
+
