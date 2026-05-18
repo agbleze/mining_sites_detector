@@ -53,19 +53,22 @@ class MobileNetV3Stem(nn.Module):
     
         
 class MobileNetV3InventedResidualBlock(nn.Module):
-    def __init__(self, out_channels, width_multiplier, expansion_rate,
+    def __init__(self, out_channels, width_multiplier, expansion_size,
                  non_linearity: Literal["relu", "hswish"],
                  stride, depthwiseconv_kernel_size: Literal["3x3", "5x5"],
                  use_squeeze_excitation: bool,
+                 batch_norm: bool,
                  **kwargs
                 ):
         super().__init__()
         out_channels = int(out_channels * width_multiplier) if width_multiplier else out_channels
-        expanded_channels = int(out_channels * expansion_rate)
         
-        self.expansion_conv = nn.LazyConv2d(out_channels=expanded_channels, kernel_size=1,
+        self.expansion_conv = nn.LazyConv2d(out_channels=expansion_size, kernel_size=1,
                                             padding=1, bias=False
                                             )
+        self.bn1 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
+            
+            
         
         if depthwiseconv_kernel_size == "3x3":
             self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None, 
@@ -91,9 +94,9 @@ class MobileNetV3InventedResidualBlock(nn.Module):
         self.pointwise_conv = nn.LazyConv2d(out_channels=out_channels, kernel_size=1,
                                             padding=1, bias=False
                                             )
-        self.bn1 = nn.LazyBatchNorm2d()
-        self.bn2 = nn.LazyBatchNorm2d()
-        self.bn3 = nn.LazyBatchNorm2d()
+        #self.bn1 = nn.LazyBatchNorm2d()
+        self.bn2 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
+        self.bn3 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
         
         if non_linearity == "relu":
             self.act1 = nn.ReLU6()
@@ -123,10 +126,11 @@ class MobileNetV3InventedResidualBlock(nn.Module):
     
     
 class MobileNetV3InventedNonResidualBlock(nn.Module):
-    def __init__(self, out_channels, width_multipler, expansion_rate,
+    def __init__(self, out_channels, width_multipler, expansion_size,
                  non_linearity: Literal["relu", "hswish"],
                 depthwiseconv_kernel_size: Literal["3x3", "5x5"],
                 use_squeeze_excitation: bool,
+                batch_norm: bool,
                 stride=2,
                 **kwargs
                 ):
@@ -138,9 +142,8 @@ class MobileNetV3InventedNonResidualBlock(nn.Module):
             raise ValueError(f"depthwiseconv_kernel_size: {depthwiseconv_kernel_size} is not a valid value. It must be one of {KERNEL_SIZE_VALUES}")
         
         out_channels = int(out_channels * width_multipler) if width_multipler else out_channels
-        expanded_channels = int(out_channels * expansion_rate)
         
-        self.expansion_conv = nn.LazyConv2d(out_channels=expanded_channels,
+        self.expansion_conv = nn.LazyConv2d(out_channels=expansion_size,
                                             kernel_size=1, padding=1,
                                             bias=False
                                             )
@@ -182,9 +185,9 @@ class MobileNetV3InventedNonResidualBlock(nn.Module):
             self.act2 = nn.Hardswish()
             self.act3 = nn.Hardswish()
             
-        self.bn1 = nn.LazyBatchNorm2d()
-        self.bn2 = nn.LazyBatchNorm2d()
-        self.bn3 = nn.LazyBatchNorm2d()
+        self.bn1 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
+        self.bn2 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
+        self.bn3 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
             
     def forward(self, x):
         x = self.expansion_conv(x)
@@ -271,10 +274,11 @@ class SqueezeExcitation(nn.Module):
         return recalibrated_x
 
 
-class MobileNetV3LastLearnerBlock(nn.Module):
-    def __init__(self, out_channels, non_linearity="hswish"):
+class MobileNetV3ConvBlock(nn.Module):
+    def __init__(self, out_channels, pool: bool, batch_norm: bool, non_linearity="hswish", **kwargs):
         super().__init__()
-        self.global_avgpool = nn.AdaptiveAvgPool2d(output_size=(1,1))
+        self.global_avgpool = nn.AdaptiveAvgPool2d(output_size=(1,1)) if pool else nn.Identity()
+        self.bn = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
         self.conv = nn.LazyConv2d(out_channels=out_channels,
                                   kernel_size=1,
                                   bias=False
@@ -288,6 +292,7 @@ class MobileNetV3LastLearnerBlock(nn.Module):
     def forward(self, x):
         x = self.global_avgpool(x)
         x = self.conv(x)
+        x = self.bn(x)
         x = self.act1(x)
         return x
         
@@ -313,28 +318,91 @@ class BlockConfig(NamedTuple):
     non_linearity: Literal[NON_LINEARITY_VALUES]    
     use_squeeze_excitation: bool
     invented_residual: bool = True
-    batchnorm = True
+    batch_norm = True
     expansion_sizes: List
     
 class MobileNetV3GroupConfig(NamedTuple):
     width_multiplier: int
-    #expansion_rate: int
     block_config: List(BlockConfig)
     
     
 def group(*, out_channels, width_multiplier,
-          expansion_rate, non_linearity,
+          expansion_sizes, non_linearity,
           use_squeeze_excitation,
-          num_blocks,
+          num_blocks, stride,
           **kwargs,
           ):
     blocks = []
     
-    for i in num_blocks:
-        pass
+    if num_blocks != expansion_sizes:
+        raise ValueError(f"num_blocks: {num_blocks} != expansion_sizes: {len(expansion_sizes)}. Number of num_blocks must equal number of items in expansion_sizes")
     
-    
-    
+    for idx, expansion_size in enumerate(expansion_sizes):
+        if len(expansion_sizes) == 1:
+            if stride == 1:
+                bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channels, width_multiplier=width_multiplier,
+                                                                expansion_size=expansion_size,
+                                                                use_squeeze_excitation=use_squeeze_excitation,
+                                                                stride=stride,
+                                                                non_linearity=non_linearity, 
+                                                                **kwargs
+                                                                )
+            else:
+                bottleneck = MobileNetV3InventedNonResidualBlock(out_channels=out_channels,
+                                                                 width_multipler=width_multiplier,
+                                                                 expansion_size=expansion_size,
+                                                                 use_squeeze_excitation=use_squeeze_excitation,
+                                                                 stride=stride,
+                                                                 non_linearity=non_linearity,
+                                                                 **kwargs
+                                                                 )
+        else:
+            prev_exp_sizes = expansion_sizes[idx - 1]
+            if prev_exp_sizes == expansion_size and stride == 1:
+                bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channels,
+                                                              width_multiplier=width_multiplier,
+                                                              expansion_size=expansion_size,
+                                                              non_linearity=non_linearity,
+                                                              stride=stride,
+                                                              **kwargs
+                                                              )
+            else:
+                bottleneck = MobileNetV3InventedNonResidualBlock(out_channels=out_channels,
+                                                                 width_multipler=width_multiplier,
+                                                                 expansion_size=expansion_size,
+                                                                 non_linearity=non_linearity,
+                                                                 stride=stride,
+                                                                 **kwargs
+                                                                 )
+            
+        blocks.append(bottleneck)
+    return nn.Sequential(*blocks)
+
+def learner(configs):
+    grp_blks = []
+    for conf in configs.block_config:
+        if conf.invented_residual == False:
+            for i in conf.num_blocks:
+                conv = MobileNetV3ConvBlock(**conf._asdict())   
+                grp_blks.append(conv) 
+        else:
+            grp_blks.append(group(**conf._asdict(), **configs._asdict()))
+    return nn.Sequential(*grp_blks)            
+
     
 block_config = [BlockConfig(out_channels=16, num_blocks=1, non_linearity="relu", use_squeeze_excitation=False, expansion_sizes=[16]),
-          
+                BlockConfig(out_channels=24, num_blocks=2, non_linearity="relu", use_squeeze_excitation=False, expansion_sizes=[64, 72]),
+                BlockConfig(out_channels=40, num_blocks=3, non_linearity="relu", use_squeeze_excitation=False, expansion_sizes=[72, 120, 120]),
+                BlockConfig(out_channels=80, num_blocks=4, non_linearity="hswish", use_squeeze_excitation=False, expansion_sizes=[240, 200, 184, 184]),
+                BlockConfig(out_channels=112, num_blocks=2, non_linearity="hswish", use_squeeze_excitation=True, expansion_sizes=[480, 672]),
+                BlockConfig(out_channels=160, num_blocks=3, non_linearity="hswish", use_squeeze_excitation=True, expansion_sizes=[672, 960, 960]),
+                BlockConfig(invented_residual=False, out_channels=960, num_blocks=1, non_linearity="hswish", use_squeeze_excitation=False, expansion_sizes=[None]),
+                BlockConfig(invented_residual=False, out_channels=1280, num_blocks=1, non_linearity="hswish", use_squeeze_excitation=False,batch_norm=False, expansion_sizes=[None])
+                ]
+                
+ 
+group_config = MobileNetV3GroupConfig(width_multiplier=1, block_config=block_config) 
+#%%
+
+184 / 80
+# %%
