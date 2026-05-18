@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.80.0 (2026-05-18)
+
+### Feature
+
+* feat: add make_model ([`19891b5`](https://github.com/agbleze/mining_sites_detector/commit/19891b53151336cc5dc0ef81e8bcba47ba28f9f8))
+
 ## v0.79.0 (2026-05-18)
 
 ### Feature
