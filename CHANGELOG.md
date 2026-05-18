@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.79.0 (2026-05-18)
+
+### Feature
+
+* feat: update group ([`8511b6c`](https://github.com/agbleze/mining_sites_detector/commit/8511b6c32693de61ab99882ee353ba3eca74f3d7))
+
+* feat: add Classifier ([`ede0a0d`](https://github.com/agbleze/mining_sites_detector/commit/ede0a0dcf93e290b2d2c39f04c484d03b0ad7ba9))
+
 ## v0.78.0 (2026-05-16)
 
 ### Feature
