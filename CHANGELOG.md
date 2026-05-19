@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.81.0 (2026-05-19)
+
+### Feature
+
+* feat: update BlockConfig ([`cfd1e3b`](https://github.com/agbleze/mining_sites_detector/commit/cfd1e3b87ca18cf2e0e62d00fd9422f957eb1139))
+
 ## v0.80.0 (2026-05-18)
 
 ### Feature
