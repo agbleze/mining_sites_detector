@@ -137,7 +137,7 @@ class MobileNetV3InventedResidualBlock(nn.Module):
     
     
 class MobileNetV3InventedNonResidualBlock(nn.Module):
-    def __init__(self, out_channels, width_multipler, expansion_size,
+    def __init__(self, *, out_channels, width_multipler, expansion_size,
                  non_linearity: Literal["relu", "hswish"],
                 depthwiseconv_kernel_size: Literal["3x3", "5x5"],
                 use_squeeze_excitation: bool,
@@ -333,6 +333,7 @@ class BlockConfig(NamedTuple):
     depthwiseconv_kernel_size: Literal["3x3", "5x5"]
     invented_residual: bool = True
     batch_norm: bool = True
+    pool: bool =False
     
     
     
@@ -350,10 +351,10 @@ def group(*, out_channels, width_multiplier,
           ):
     blocks = []
     
-    if num_blocks != expansion_sizes:
+    if num_blocks != len(expansion_sizes):
         raise ValueError(f"num_blocks: {num_blocks} != expansion_sizes: {len(expansion_sizes)}. Number of num_blocks must equal number of items in expansion_sizes")
     
-    for idx, expansion_size in enumerate(expansion_sizes):
+    for idx, (expansion_size, stride) in enumerate(zip(expansion_sizes, strides)):
         if len(expansion_sizes) == 1:
             if stride == 1:
                 bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channels, width_multiplier=width_multiplier,
@@ -380,6 +381,7 @@ def group(*, out_channels, width_multiplier,
                                                               expansion_size=expansion_size,
                                                               non_linearity=non_linearity,
                                                               stride=stride,
+                                                              use_squeeze_excitation=use_squeeze_excitation,
                                                               **kwargs
                                                               )
             else:
@@ -387,6 +389,7 @@ def group(*, out_channels, width_multiplier,
                                                                  width_multipler=width_multiplier,
                                                                  expansion_size=expansion_size,
                                                                  non_linearity=non_linearity,
+                                                                 use_squeeze_excitation=use_squeeze_excitation,
                                                                  stride=stride,
                                                                  **kwargs
                                                                  )
@@ -398,7 +401,7 @@ def learner(configs):
     grp_blks = []
     for conf in configs.block_config:
         if conf.invented_residual == False:
-            for i in conf.num_blocks:
+            for i in range(conf.num_blocks):
                 conv = MobileNetV3ConvBlock(**conf._asdict())   
                 grp_blks.append(conv) 
         else:
@@ -450,14 +453,16 @@ block_config = [BlockConfig(out_channels=16, num_blocks=1, non_linearity="relu",
                             expansion_sizes=[672, 960, 960],
                             strides=[2, 1, 1]
                             ),
-                BlockConfig(invented_residual=False, depthwiseconv_kernel_size=None, out_channels=960, 
+                BlockConfig(invented_residual=False, 
+                            depthwiseconv_kernel_size=None, out_channels=960, 
                             num_blocks=1, non_linearity="hswish", use_squeeze_excitation=False, 
                             expansion_sizes=[None],
                             strides=[1]),
-                BlockConfig(invented_residual=False, depthwiseconv_kernel_size=None, out_channels=1280, 
+                BlockConfig(invented_residual=False, 
+                            depthwiseconv_kernel_size=None, out_channels=1280, 
                             num_blocks=1, non_linearity="hswish", use_squeeze_excitation=False,
                             batch_norm=False, expansion_sizes=[None],
-                            strides=[1]
+                            strides=[1], pool=True,
                             )
                 ]
                 
