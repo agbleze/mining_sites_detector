@@ -50,7 +50,7 @@ class MobileNetV3Stem(nn.Module):
         
         self.conv = nn.LazyConv2d(kernel_size=3, out_channels=out_channels,
                                   bias=False,
-                                  stride=2
+                                  stride=2, padding=1,
                                   )
         self.hswish = nn.Hardswish()
         self.bn = nn.LazyBatchNorm2d()
@@ -61,8 +61,7 @@ class MobileNetV3Stem(nn.Module):
         x = self.hswish(x)
         return x
     
-    
-        
+            
 class MobileNetV3InventedResidualBlock(nn.Module):
     def __init__(self, out_channels, width_multiplier, expansion_size,
                  non_linearity: Literal["relu", "hswish"],
@@ -75,24 +74,22 @@ class MobileNetV3InventedResidualBlock(nn.Module):
         out_channels = int(out_channels * width_multiplier) if width_multiplier else out_channels
         
         self.expansion_conv = nn.LazyConv2d(out_channels=expansion_size, kernel_size=1,
-                                            padding=1, bias=False
+                                            #padding=1, 
+                                            bias=False
                                             )
-        self.bn1 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
-            
-            
+        self.bn1 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()            
         
         if depthwiseconv_kernel_size == "3x3":
             self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None, 
                                                       kernel_size=3,
                                                       bias=False,
-                                                      stride=1,
+                                                      stride=stride, #1,
                                                       padding=1
                                                     )
             if use_squeeze_excitation:
                 squeeze_exite = SqueezeExcitation(reduction_ratio=kwargs.get("reduction_ratio", 4))
                 self.depthwise_conv = nn.Sequential(self.depthwise_conv, squeeze_exite)
-                
-            
+                            
         elif depthwiseconv_kernel_size == "5x5":
             self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None, kernel_size=5,
                                                       stride=1,
@@ -178,9 +175,7 @@ class MobileNetV3InventedNonResidualBlock(nn.Module):
             if use_squeeze_excitation:
                 squeeze_exite = SqueezeExcitation(reduction_ratio=kwargs.get("reduction_ratio", 4))
                 self.depthwise_conv = nn.Sequential(self.depthwise_conv, squeeze_exite)
-                
-                
-            
+                            
         self.pointwise_conv = nn.LazyConv2d(out_channels=out_channels,
                                             kernel_size=1,
                                             padding=1, bias=False
@@ -235,7 +230,6 @@ class SELazyLinear(nn.LazyLinear):
         elif self.mode == "expand":
             self.out_features = int(self.in_features * self.reduction_ratio)
         super().initialize_parameters()
-
         
                
 class Squeeze(nn.Module):
@@ -266,8 +260,7 @@ class Excitation(nn.Module):
         x = self.relu(x)
         x = self.fc2(x)
         return x
-             
-        
+                     
 
 class SqueezeExcitation(nn.Module):
     def __init__(self, reduction_ratio):
@@ -334,9 +327,7 @@ class BlockConfig(NamedTuple):
     invented_residual: bool = True
     batch_norm: bool = True
     pool: bool =False
-    
-    
-    
+        
     
 class MobileNetV3GroupConfig(NamedTuple):
     width_multiplier: int
