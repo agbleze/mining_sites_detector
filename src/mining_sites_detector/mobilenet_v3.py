@@ -365,8 +365,8 @@ def group(*, out_channels, width_multiplier,
                                                                  **kwargs
                                                                  )
         else:
-            prev_exp_sizes = expansion_sizes[idx - 1]
-            if prev_exp_sizes == expansion_size and stride == 1:
+            #prev_exp_sizes = expansion_sizes[idx - 1]
+            if kwargs.get("prev_out_channel") == out_channels and stride == 1:
                 bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channels,
                                                               width_multiplier=width_multiplier,
                                                               expansion_size=expansion_size,
@@ -390,13 +390,17 @@ def group(*, out_channels, width_multiplier,
 
 def learner(configs):
     grp_blks = []
-    for conf in configs.block_config:
+    for idx, conf in enumerate(configs.block_config):
+        if idx != 0:
+            prev_out_channel = configs.block_config[idx-1]
+        else:
+            prev_out_channel = -1
         if conf.invented_residual == False:
             for i in range(conf.num_blocks):
                 conv = MobileNetV3ConvBlock(**conf._asdict())   
                 grp_blks.append(conv) 
         else:
-            grp_blks.append(group(**conf._asdict(), **configs._asdict()))
+            grp_blks.append(group(**conf._asdict(), **configs._asdict(), prev_out_channel=prev_out_channel))
     return nn.Sequential(*grp_blks)            
 
 
