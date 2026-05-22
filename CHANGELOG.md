@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.82.0 (2026-05-22)
+
+### Feature
+
+* feat: add prev_out_channel ([`f0b889c`](https://github.com/agbleze/mining_sites_detector/commit/f0b889c0671c8e4a9aedce1c88eba6d42a3b6bc9))
+
 ## v0.81.1 (2026-05-20)
 
 ### Fix
