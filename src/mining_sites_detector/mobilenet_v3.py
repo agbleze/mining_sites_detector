@@ -92,7 +92,7 @@ class MobileNetV3InventedResidualBlock(nn.Module):
                             
         elif depthwiseconv_kernel_size == "5x5":
             self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None, kernel_size=5,
-                                                      stride=1,
+                                                      stride=1, bias=False,
                                                       padding=1
                                                       )
             if use_squeeze_excitation:
@@ -342,6 +342,8 @@ def group(*, out_channels, width_multiplier,
           ):
     blocks = []
     
+    #print(f"kwargs: {kwargs}")
+    
     if num_blocks != len(expansion_sizes):
         raise ValueError(f"num_blocks: {num_blocks} != expansion_sizes: {len(expansion_sizes)}. Number of num_blocks must equal number of items in expansion_sizes")
     
@@ -366,6 +368,7 @@ def group(*, out_channels, width_multiplier,
                                                                  )
         else:
             #prev_exp_sizes = expansion_sizes[idx - 1]
+            print(f'kwargs.get("prev_out_channel"): {kwargs.get("prev_out_channel")}')
             if kwargs.get("prev_out_channel") == out_channels and stride == 1:
                 bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channels,
                                                               width_multiplier=width_multiplier,
