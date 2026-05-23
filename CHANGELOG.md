@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.82.1 (2026-05-23)
+
+### Fix
+
+* fix: debug prev_channel ([`3e97ae3`](https://github.com/agbleze/mining_sites_detector/commit/3e97ae3e481be4b9639a624448f9a488cc2553de))
+
 ## v0.82.0 (2026-05-22)
 
 ### Feature
