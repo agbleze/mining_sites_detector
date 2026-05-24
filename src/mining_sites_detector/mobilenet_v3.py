@@ -7,16 +7,14 @@ from typing import NamedTuple, List, Literal
 NON_LINEARITY_VALUES = ["relu", "hswish"]
 KERNEL_SIZE_VALUES = ["3x3", "5x5"]
 
-
-def kernel_initializer(m, kernel_initializer="he_normal"):
+def kernel_initializer(m, initializer_type="he_normal"):
     if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
-        if kernel_initializer == "he_normal":
+        if initializer_type == "he_normal":
             nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
-        elif kernel_initializer == "glorot_uniform":
+        elif initializer_type == "glorot_uniform":
             nn.init.xavier_uniform_(m.weight)
         if m.bias is not None:
             nn.init.zeros_(m.bias)
-
 
 
 class LazyDepthwiseConv2d(nn.LazyConv2d):
@@ -24,7 +22,6 @@ class LazyDepthwiseConv2d(nn.LazyConv2d):
         x = input[0] if isinstance(input, (tuple, list)) else input
         device = x.device
         dtype = x.dtype
-        
         in_ch = x.shape[1]
         if not self.out_channels:
             self.out_channels = int(in_ch)
@@ -93,16 +90,16 @@ class MobileNetV3InventedResidualBlock(nn.Module):
         elif depthwiseconv_kernel_size == "5x5":
             self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None, kernel_size=5,
                                                       stride=1, bias=False,
-                                                      padding=1
+                                                      padding=2
                                                       )
             if use_squeeze_excitation:
                 squeeze_exite = SqueezeExcitation(reduction_ratio=kwargs.get("reduction_ratio", 4))
                 self.depthwise_conv = nn.Sequential(self.depthwise_conv, squeeze_exite)
                 
         self.pointwise_conv = nn.LazyConv2d(out_channels=out_channels, kernel_size=1,
-                                            padding=1, bias=False
+                                            #padding=1, 
+                                            bias=False
                                             )
-        #self.bn1 = nn.LazyBatchNorm2d()
         self.bn2 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
         self.bn3 = nn.LazyBatchNorm2d() if batch_norm else nn.Identity()
         
@@ -128,7 +125,6 @@ class MobileNetV3InventedResidualBlock(nn.Module):
         x = self.pointwise_conv(x)
         x = self.bn3(x)
         #x = self.act3(x)
-        
         x += shortcut
         return x
     
@@ -152,7 +148,7 @@ class MobileNetV3InventedNonResidualBlock(nn.Module):
         out_channels = int(out_channels * width_multipler) if width_multipler else out_channels
         
         self.expansion_conv = nn.LazyConv2d(out_channels=expansion_size,
-                                            kernel_size=1, padding=1,
+                                            kernel_size=1,# padding=1,
                                             bias=False
                                             )
         if depthwiseconv_kernel_size == "3x3":
@@ -169,7 +165,8 @@ class MobileNetV3InventedNonResidualBlock(nn.Module):
             self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None,
                                                       kernel_size=5,
                                                       stride=stride,
-                                                      padding=1, bias=False
+                                                      padding=2, 
+                                                      bias=False
                                                       )
             
             if use_squeeze_excitation:
@@ -178,7 +175,8 @@ class MobileNetV3InventedNonResidualBlock(nn.Module):
                             
         self.pointwise_conv = nn.LazyConv2d(out_channels=out_channels,
                                             kernel_size=1,
-                                            padding=1, bias=False
+                                            #padding=1, 
+                                            bias=False
                                             )
         
         if non_linearity == "relu":
@@ -222,14 +220,14 @@ class SELazyLinear(nn.LazyLinear):
     def initialize_parameters(self, input):
         x = input[0] if isinstance(input, (list, tuple)) else input
         
-        in_ch = int(x.shape[0])
+        in_ch = int(x.shape[1])
         self.in_features = in_ch
                 
         if self.mode == "reduce":
             self.out_features = int(max(1, in_ch // self.reduction_ratio))
         elif self.mode == "expand":
             self.out_features = int(self.in_features * self.reduction_ratio)
-        super().initialize_parameters()
+        super().initialize_parameters(input)
         
                
 class Squeeze(nn.Module):
@@ -272,8 +270,10 @@ class SqueezeExcitation(nn.Module):
     def forward(self, x):
         shortcut = x
         x = self.squeeze(x)
+        x = torch.flatten(x, start_dim=1)
         x = self.excitation(x)
         x = self.calibrate(x)
+        x = x.unsqueeze(-1).unsqueeze(-1)
         recalibrated_x = shortcut * x
         return recalibrated_x
 
@@ -341,16 +341,14 @@ def group(*, out_channels, width_multiplier,
           **kwargs,
           ):
     blocks = []
-    
-    #print(f"kwargs: {kwargs}")
-    
+        
     if num_blocks != len(expansion_sizes):
         raise ValueError(f"num_blocks: {num_blocks} != expansion_sizes: {len(expansion_sizes)}. Number of num_blocks must equal number of items in expansion_sizes")
     
-    for idx, (expansion_size, stride) in enumerate(zip(expansion_sizes, strides)):
-        if len(expansion_sizes) == 1:
+    for idx, (expansion_size, stride, out_channel) in enumerate(zip(expansion_sizes, strides, out_channels)):
+        if len(out_channels) == 1:
             if stride == 1:
-                bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channels, width_multiplier=width_multiplier,
+                bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channel, width_multiplier=width_multiplier,
                                                                 expansion_size=expansion_size,
                                                                 use_squeeze_excitation=use_squeeze_excitation,
                                                                 stride=stride,
@@ -358,7 +356,7 @@ def group(*, out_channels, width_multiplier,
                                                                 **kwargs
                                                                 )
             else:
-                bottleneck = MobileNetV3InventedNonResidualBlock(out_channels=out_channels,
+                bottleneck = MobileNetV3InventedNonResidualBlock(out_channels=out_channel,
                                                                  width_multipler=width_multiplier,
                                                                  expansion_size=expansion_size,
                                                                  use_squeeze_excitation=use_squeeze_excitation,
@@ -367,19 +365,10 @@ def group(*, out_channels, width_multiplier,
                                                                  **kwargs
                                                                  )
         else:
-            #prev_exp_sizes = expansion_sizes[idx - 1]
-            print(f'kwargs.get("prev_out_channel"): {kwargs.get("prev_out_channel")}')
-            if kwargs.get("prev_out_channel") == out_channels and stride == 1:
-                bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channels,
-                                                              width_multiplier=width_multiplier,
-                                                              expansion_size=expansion_size,
-                                                              non_linearity=non_linearity,
-                                                              stride=stride,
-                                                              use_squeeze_excitation=use_squeeze_excitation,
-                                                              **kwargs
-                                                              )
-            else:
-                bottleneck = MobileNetV3InventedNonResidualBlock(out_channels=out_channels,
+            prev_out_channel = out_channels[idx-1]
+            
+            if (idx == 0) or not (out_channel == prev_out_channel and stride == 1):
+                bottleneck = MobileNetV3InventedNonResidualBlock(out_channels=out_channel,
                                                                  width_multipler=width_multiplier,
                                                                  expansion_size=expansion_size,
                                                                  non_linearity=non_linearity,
@@ -388,22 +377,29 @@ def group(*, out_channels, width_multiplier,
                                                                  **kwargs
                                                                  )
             
+            elif  out_channel == prev_out_channel and stride == 1:
+                bottleneck = MobileNetV3InventedResidualBlock(out_channels=out_channel,
+                                                              width_multiplier=width_multiplier,
+                                                              expansion_size=expansion_size,
+                                                              non_linearity=non_linearity,
+                                                              stride=stride,
+                                                              use_squeeze_excitation=use_squeeze_excitation,
+                                                              **kwargs
+                                                              )
+            
         blocks.append(bottleneck)
     return nn.Sequential(*blocks)
 
 def learner(configs):
     grp_blks = []
     for idx, conf in enumerate(configs.block_config):
-        if idx != 0:
-            prev_out_channel = configs.block_config[idx-1]
-        else:
-            prev_out_channel = -1
         if conf.invented_residual == False:
             for i in range(conf.num_blocks):
                 conv = MobileNetV3ConvBlock(**conf._asdict())   
                 grp_blks.append(conv) 
         else:
-            grp_blks.append(group(**conf._asdict(), **configs._asdict(), prev_out_channel=prev_out_channel))
+            grp_blks.append(group(**conf._asdict(), **configs._asdict(), #prev_out_channel=prev_out_channel
+                                  ))
     return nn.Sequential(*grp_blks)            
 
 
@@ -416,37 +412,35 @@ def make_model(num_classes, learner_configs, data, device="cuda",
     model = nn.Sequential(stem, learner_module, classifier).to(device)
     data.to(device)
     _ = model(data)
-    model.apply(kernel_initializer(kernel_initializer=initializer_type))
+    model.apply(lambda module: kernel_initializer(module, initializer_type=initializer_type))
     return model
     
 
-
-
-block_config = [BlockConfig(out_channels=16, num_blocks=1, non_linearity="relu", 
+block_config = [BlockConfig(out_channels=[16], num_blocks=1, non_linearity="relu", 
                             use_squeeze_excitation=False, expansion_sizes=[16], 
                             depthwiseconv_kernel_size="3x3",
                             strides=[1]),
-                BlockConfig(out_channels=24, depthwiseconv_kernel_size="3x3", 
+                BlockConfig(out_channels=[24, 24], depthwiseconv_kernel_size="3x3", 
                             num_blocks=2, non_linearity="relu", 
                             use_squeeze_excitation=False, expansion_sizes=[64, 72],
                             strides=[2, 1]
                             ),
-                BlockConfig(out_channels=40, depthwiseconv_kernel_size="5x5", num_blocks=3, 
-                            non_linearity="relu", use_squeeze_excitation=False, 
+                BlockConfig(out_channels=[40, 40, 40], depthwiseconv_kernel_size="5x5", num_blocks=3, 
+                            non_linearity="relu", use_squeeze_excitation=True, 
                             expansion_sizes=[72, 120, 120],
                             strides=[2,1,1]
                             ),
-                BlockConfig(out_channels=80, depthwiseconv_kernel_size="3x3", num_blocks=4, 
+                BlockConfig(out_channels=[80, 80, 80, 80], depthwiseconv_kernel_size="3x3", num_blocks=4, 
                             non_linearity="hswish", use_squeeze_excitation=False, 
                             expansion_sizes=[240, 200, 184, 184],
                             strides=[2, 1, 1, 1]
                             ),
-                BlockConfig(out_channels=112, depthwiseconv_kernel_size="3x3", num_blocks=2, 
+                BlockConfig(out_channels=[112, 112], depthwiseconv_kernel_size="3x3", num_blocks=2, 
                             non_linearity="hswish", use_squeeze_excitation=True, 
                             expansion_sizes=[480, 672],
                             strides=[1, 1]
                             ),
-                BlockConfig(out_channels=160, depthwiseconv_kernel_size="5x5", num_blocks=3, 
+                BlockConfig(out_channels=[160, 160, 160], depthwiseconv_kernel_size="5x5", num_blocks=3, 
                             non_linearity="hswish", use_squeeze_excitation=True, 
                             expansion_sizes=[672, 960, 960],
                             strides=[2, 1, 1]
@@ -470,16 +464,14 @@ group_config = MobileNetV3GroupConfig(width_multiplier=1, block_config=block_con
 
 if __name__ == "__main__":
     device="cuda"
-    data = torch.randn(3, 3, 224, 223).to(device)
+    data = torch.randn(1, 3, 224, 224).to(device)
     model = make_model(num_classes=1000, learner_configs=group_config, 
                        data=data,
                        device=device,
                        initializer_type="he_normal"
                        )
     
-    summary(mode=model, input_data=data, depth=4,
+    summary(model=model, input_data=data, depth=4,
             col_names=["input_size", "output_size", "num_params", "mult_adds"]
             )
-
-
 
