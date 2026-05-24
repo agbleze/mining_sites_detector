@@ -416,7 +416,7 @@ def make_model(num_classes, learner_configs, data, device="cuda",
     return model
     
 
-block_config = [BlockConfig(out_channels=[16], num_blocks=1, non_linearity="relu", 
+large_block_config = [BlockConfig(out_channels=[16], num_blocks=1, non_linearity="relu", 
                             use_squeeze_excitation=False, expansion_sizes=[16], 
                             depthwiseconv_kernel_size="3x3",
                             strides=[1]),
@@ -459,13 +459,12 @@ block_config = [BlockConfig(out_channels=[16], num_blocks=1, non_linearity="relu
                 ]
                 
  
-group_config = MobileNetV3GroupConfig(width_multiplier=1, block_config=block_config) 
-#%%
+large_group_config = MobileNetV3GroupConfig(width_multiplier=1, block_config=large_block_config) 
 
 if __name__ == "__main__":
     device="cuda"
     data = torch.randn(1, 3, 224, 224).to(device)
-    model = make_model(num_classes=1000, learner_configs=group_config, 
+    model = make_model(num_classes=1000, learner_configs=large_group_config, 
                        data=data,
                        device=device,
                        initializer_type="he_normal"
