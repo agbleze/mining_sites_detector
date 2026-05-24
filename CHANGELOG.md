@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.82.2 (2026-05-24)
+
+### Fix
+
+* fix: shape mismatch ([`1fd01eb`](https://github.com/agbleze/mining_sites_detector/commit/1fd01ebe78c63aa5573c90da93a2ce4baef8e9f1))
+
 ## v0.82.1 (2026-05-23)
 
 ### Fix
