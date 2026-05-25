@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.84.0 (2026-05-25)
+
+### Feature
+
+* feat: add bypass_type=simple ([`c17fe44`](https://github.com/agbleze/mining_sites_detector/commit/c17fe44b969774b4b3a235f4050d0a9e50a1e557))
+
 ## v0.83.0 (2026-05-25)
 
 ### Feature
