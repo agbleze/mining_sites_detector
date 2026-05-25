@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.83.0 (2026-05-25)
+
+### Feature
+
+* feat: add squeezenet ([`d4bc7ed`](https://github.com/agbleze/mining_sites_detector/commit/d4bc7edd244f8fd7382a86e80096125738d1de0b))
+
+### Style
+
+* style: change group_config to large_group_config ([`7f8e0b2`](https://github.com/agbleze/mining_sites_detector/commit/7f8e0b240177a02492f2bbe47a67dc29cfd576ec))
+
 ## v0.82.2 (2026-05-24)
 
 ### Fix
