@@ -45,7 +45,17 @@ class FireModule(nn.Module):
         x = torch.cat([self.expand1x1(x), self.expand3x3(x)], dim=1)
         x = self.dropout(x)
         return x
-    
+
+class FireIdentityModule(nn.Module):
+    def __init__(self, s1x1, e1x1, e3x3, dropout=None, **kwargs):
+        super().__init__()
+        self.fire_module = FireModule(s1x1=s1x1, e1x1=e1x1, e3x3=e3x3, dropout=dropout, **kwargs)
+        
+    def forward(self, x):
+        identity = x
+        out = self.fire_module(x)
+        out += identity
+        return out   
 
 class Classifier(nn.Module):
     def __init__(self, num_classes):
@@ -82,9 +92,11 @@ def group(*, s1x1, e1x1, e3x3, num_blocks, downsample: bool=False,
     
     blocks = []
     for i in range(num_blocks):
-        if i == 1 and downsample:
-            mod = FireModule(s1x1=s1x1, e1x1=e1x1, e3x3=e3x3)
-            mod = nn.Sequential(mod, nn.MaxPool2d(kernel_size=3, stride=2))
+        if i == 1:
+            mod = FireIdentityModule(s1x1=s1x1, e1x1=e1x1, e3x3=e3x3) if bypass_type == "simple" else FireModule(s1x1=s1x1, e1x1=e1x1, e3x3=e3x3)
+            if downsample:
+                #mod = FireModule(s1x1=s1x1, e1x1=e1x1, e3x3=e3x3)
+                mod = nn.Sequential(mod, nn.MaxPool2d(kernel_size=3, stride=2))
         else:
             mod = FireModule(s1x1=s1x1, e1x1=e1x1, e3x3=e3x3)
         blocks.append(mod)
@@ -125,7 +137,7 @@ if __name__ == "__main__":
                     SqueezeNetBlockConfig(s1x1=48, e1x1=192, e3x3=192, num_blocks=2, downsample=False),
                     SqueezeNetBlockConfig(s1x1=64, e1x1=256, e3x3=256, num_blocks=2, downsample=True)
                     ]
-    group_config = SqueezeNetGroupConfig(block_configs=block_config, bypass_type=None)
+    group_config = SqueezeNetGroupConfig(block_configs=block_config, bypass_type="simple")
     
     model = make_model(num_classes=1000, learner_configs=group_config, 
                         data=data,
