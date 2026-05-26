@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.85.0 (2026-05-26)
+
+### Feature
+
+* feat: add ShuffleNetStem ([`f18052d`](https://github.com/agbleze/mining_sites_detector/commit/f18052d6724589c10f2ccd7ad20251c61d682da5))
+
 ## v0.84.0 (2026-05-25)
 
 ### Feature
