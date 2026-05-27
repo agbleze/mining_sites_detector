@@ -19,3 +19,23 @@ class ShuffleNetStem(nn.Module):
         return x
     
     
+    
+class ChannelShuffle(nn.Module):
+    def __init__(self, groups):
+        super().__init__()
+        self.groups = groups
+        
+    def forward(self, x):
+        batch_size, num_channels, height, width = x.size()
+        channels_per_group = num_channels // self.groups
+        
+        # Reshape the input tensor to (batch_size, groups, channels_per_group, height, width)
+        x = x.view(batch_size, self.groups, channels_per_group, height, width)
+        
+        # Transpose the groups and channels_per_group dimensions
+        x = x.transpose(1, 2).contiguous()
+        
+        # Reshape back to the original shape
+        x = x.view(batch_size, num_channels, height, width)
+        
+        return x
