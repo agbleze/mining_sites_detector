@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.86.0 (2026-05-27)
+
+### Feature
+
+* feat: add ChannelShuffle ([`0a2b2c0`](https://github.com/agbleze/mining_sites_detector/commit/0a2b2c0546b8b5cf0871860a7d65eea8692cb3f6))
+
 ## v0.85.0 (2026-05-26)
 
 ### Feature
