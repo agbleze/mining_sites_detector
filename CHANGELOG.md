@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.87.0 (2026-05-29)
+
+### Feature
+
+* feat: remove out_channels from SqueezeNetBlockConfig ([`6d9177d`](https://github.com/agbleze/mining_sites_detector/commit/6d9177d9d713c7fc66ee23c3b026e18733aa0574))
+
+### Style
+
+* style: remove spaces ([`4c3ee19`](https://github.com/agbleze/mining_sites_detector/commit/4c3ee19bd067e55648a98b1b975701968e7cff89))
+
 ## v0.86.0 (2026-05-27)
 
 ### Feature
