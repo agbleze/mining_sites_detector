@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchinfo import summary
-from typing import NamedTuple, List, Tuple, Optional
+from typing import NamedTuple, List, Tuple, Optional, Literal
 
 
 def kernel_initializer(m, initializer_type="he_normal"):
@@ -72,7 +72,6 @@ class Classifier(nn.Module):
     
     
 class SqueezeNetBlockConfig(NamedTuple):
-    #out_channels: int
     s1x1: int
     e1x1: int
     e3x3: int
@@ -82,11 +81,11 @@ class SqueezeNetBlockConfig(NamedTuple):
     
 class SqueezeNetGroupConfig(NamedTuple):
     block_configs: List[SqueezeNetBlockConfig]
-    bypass_type: Optional[str] = None
+    bypass_type: Optional[Literal["simple", "complex"]] = None
   
     
 def group(*, s1x1, e1x1, e3x3, num_blocks, downsample: bool=False,
-          bypass_type: Optional[str]=None,
+          bypass_type: Optional[Literal["simple", "complex"]]=None,
           **kwargs
           ):
     
