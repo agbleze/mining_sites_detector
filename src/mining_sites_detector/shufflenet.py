@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchinfo import summary
-from typing import List, Tuple, Optional, Literal
+from typing import List, NamedTuple
 
 
 class ShuffleNetStem(nn.Module):
@@ -39,3 +39,359 @@ class ChannelShuffle(nn.Module):
         x = x.view(batch_size, num_channels, height, width)
         
         return x
+    
+    
+class LazyDepthwiseConv2d(nn.LazyConv2d):
+    def initialize_parameters(self, input):
+        x = input[0] if isinstance(input, (list, tuple)) else input
+        device = x.device
+        dtype = x.dtype
+        self.in_channels = int(x.shape[1])
+        
+        if not self.out_channels:
+            self.out_channels = self.in_channels
+            
+        #if self.groups == 0:
+        self.groups = self.in_channels
+        
+        if isinstance(self.kernel_size, int):
+            kernel_size = (self.kernel_size, self.kernel_size)
+        else:
+            kernel_size = self.kernel_size
+            
+        weight_shape = (self.out_channels, self.in_channels // self.groups, *kernel_size)
+        self.weight = nn.Parameter(torch.empty(weight_shape, device=device, dtype=dtype))
+        
+        if self.bias:
+            self.bias = nn.Parameter(torch.empty(self.out_channels, device=device, dtype=dtype))
+        
+
+class LazyGroupPointwiseRealignBottleneck(nn.LazyConv2d):
+    
+    def __init__(self, out_channels, kernel_size, size=2.5, **kwargs):
+        super().__init__(out_channels, kernel_size, **kwargs)
+        self.size = size
+        
+    def initialize_parameters(self, input):
+        x = input[0] if isinstance(input, (list, tuple)) else input
+        device = x.device
+        dtype = x.dtype
+        self.in_channels = int(x.shape[1])
+        out_ch = self.out_channels
+        print(f"size: {self.size}")
+        print(f"out_ch: {out_ch}, in_channels: {self.in_channels}, groups: {self.groups}")
+        
+        self.out_channels = int(out_ch - (self.in_channels * 4))
+        
+        if isinstance(self.kernel_size, int):
+            kernel_size = (self.kernel_size, self.kernel_size)
+        else:
+            kernel_size = self.kernel_size
+        weight_shape = (self.out_channels, self.in_channels // self.groups, *kernel_size)
+        
+        self.weight = nn.Parameter(torch.empty(weight_shape, device=device, dtype=dtype))
+        if self.bias:
+            self.bias = nn.Parameter(torch.empty(self.out_channels, device=device, dtype=dtype))
+
+class ShuffleNetResidualBlock(nn.Module):
+    def __init__(self, out_channels, groups, width_multiplier=1, **kwargs):
+        super().__init__()
+        self.groups = groups
+        out_channels = int(out_channels * width_multiplier)
+        bottleneck_channels = int(out_channels * 0.25)
+        
+        self.pointwise_group_conv1 = nn.LazyConv2d(out_channels=bottleneck_channels, 
+                                                    kernel_size=1, 
+                                                    bias=False,
+                                                    groups=groups,
+                                                    )
+        self.bn1 = nn.LazyBatchNorm2d()
+        self.relu1 = nn.ReLU(inplace=True)
+        
+        self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None,
+                                                  kernel_size=3, 
+                                                  stride=1, 
+                                                  padding=1, 
+                                                  bias=False,
+                                                  )
+        self.bn2 = nn.LazyBatchNorm2d()
+        
+        self.pointwise_conv2 = nn.LazyConv2d(out_channels=out_channels, 
+                                            kernel_size=1, 
+                                            bias=False, 
+                                            groups=groups
+                                            )
+        self.bn3 = nn.LazyBatchNorm2d()
+        self.relu2 = nn.ReLU(inplace=True)
+        
+    def forward(self, x):
+        identity = x        
+        out = self.pointwise_group_conv1(x)
+        out = self.bn1(out)
+        out = self.relu1(out)
+        out = ChannelShuffle(groups=self.groups)(out)
+        out = self.depthwise_conv(out)
+        out = self.bn2(out)
+        out = self.pointwise_conv2(out)
+        out = self.bn3(out)
+        
+        out += identity
+        out = self.relu2(out)
+        return out
+
+
+# class ShuffleNetResidualBlock(nn.Module):
+#     def __init__(self, out_channels, groups, **kwargs):
+#         super().__init__()
+#         self.groups = groups
+
+#         bottleneck_channels = out_channels // 4
+
+#         self.pw1 = nn.LazyConv2d(
+#             out_channels=bottleneck_channels,
+#             kernel_size=1,
+#             groups=groups,
+#             bias=False,
+#         )
+#         self.bn1 = nn.LazyBatchNorm2d()
+#         self.relu1 = nn.ReLU(inplace=True)
+
+#         self.dw = LazyDepthwiseConv2d(
+#             out_channels=None,
+#             kernel_size=3,
+#             stride=1,
+#             padding=1,
+#             bias=False,
+#         )
+#         self.bn2 = nn.LazyBatchNorm2d()
+
+#         self.pw2 = nn.LazyConv2d(
+#             out_channels=out_channels,   # <- must match identity
+#             kernel_size=1,
+#             groups=groups,
+#             bias=False,
+#         )
+#         self.bn3 = nn.LazyBatchNorm2d()
+#         self.relu2 = nn.ReLU(inplace=True)
+
+#     def forward(self, x):
+#         identity = x
+
+#         out = self.pw1(x)
+#         out = self.bn1(out)
+#         out = self.relu1(out)
+#         out = ChannelShuffle(self.groups)(out)
+#         out = self.dw(out)
+#         out = self.bn2(out)
+#         out = self.pw2(out)
+#         out = self.bn3(out)
+
+#         out += identity
+#         out = self.relu2(out)
+#         return out
+        
+        
+class ShuffleNetDenseBlock(nn.Module):
+    def __init__(self, out_channels, groups, width_multiplier=1, **kwargs):
+        super().__init__()
+        self.groups = groups
+        out_channels = int(out_channels * width_multiplier) // 2
+        
+        bottleneck_channels = int(out_channels * 0.25)
+        
+        self.pointwise_group_conv1 = nn.LazyConv2d(out_channels=bottleneck_channels,
+                                                    kernel_size=1, 
+                                                    bias=False,
+                                                    groups=groups,
+                                                    )
+        self.bn1 = nn.LazyBatchNorm2d()
+        self.relu1 = nn.ReLU(inplace=True)
+        
+        self.depthwise_conv = LazyDepthwiseConv2d(out_channels=None,
+                                                  kernel_size=3, 
+                                                  stride=2, 
+                                                  padding=1, 
+                                                  bias=False
+                                                  )
+        self.bn2 = nn.LazyBatchNorm2d()
+        
+        self.pointwise_group_conv2 = nn.LazyConv2d(out_channels=out_channels,
+                                                    kernel_size=1, 
+                                                    bias=False,
+                                                    groups=groups
+                                                    )
+        self.bn3 = nn.LazyBatchNorm2d()
+        
+        self.downsample = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
+        self.relu2 = nn.ReLU(inplace=True)
+        
+    def forward(self, x):
+        pooled_x = self.downsample(x)
+        x = self.pointwise_group_conv1(x)
+        x = self.bn1(x)
+        x = self.relu1(x)
+        x = ChannelShuffle(groups=self.groups)(x)
+        x = self.depthwise_conv(x)
+        x = self.bn2(x)
+        x = self.pointwise_group_conv2(x)
+        x = self.bn3(x)
+        
+        x = torch.concat([x, pooled_x], dim=1)
+        x = self.relu2(x)
+        return x
+        
+        
+class ShuffleNetDenseBlock(nn.Module):
+    def __init__(self, out_channels, groups, width_multiplier=1, **kwargs):
+        super().__init__()
+        self.groups = groups
+        
+        # Final output channels for the stage
+        out_channels = int(out_channels * width_multiplier)
+        
+        # Main branch should output half
+        #main_out = out_channels // 2
+        bottleneck_channels = out_channels // 4
+        
+        # 1x1 GConv (reduce)
+        self.pw1 = nn.LazyConv2d(out_channels=bottleneck_channels,
+                                kernel_size=1,
+                                groups=groups,
+                                bias=False
+                                )
+        self.bn1 = nn.LazyBatchNorm2d()
+        self.relu = nn.ReLU(inplace=True)
+        
+        self.dw = LazyDepthwiseConv2d(out_channels=None,
+                                    kernel_size=3,
+                                    stride=2,
+                                    padding=1,
+                                    bias=False
+                                    )
+        self.bn2 = nn.LazyBatchNorm2d()
+        
+        self.pointwise_align_conv = LazyGroupPointwiseRealignBottleneck(out_channels=out_channels,
+                                                                        kernel_size=1,
+                                                                        groups=groups,
+                                                                        bias=False,
+                                                                        size=2
+                                                                        )
+        self.bn3 = nn.LazyBatchNorm2d()
+        
+        self.shortcut_pool = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
+        
+        self.out_channels = out_channels
+
+    def forward(self, x):
+        shortcut = self.shortcut_pool(x)
+        
+        out = self.pw1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+        out = ChannelShuffle(self.groups)(out)
+        out = self.dw(out)
+        out = self.bn2(out)
+        out = self.pointwise_align_conv(out)
+        out = self.bn3(out)
+        
+
+        print(f"out shape before concat: {out.shape}, shortcut shape: {shortcut.shape}")
+        out = torch.cat([out, shortcut], dim=1)
+        out = self.relu(out)
+        return out
+
+            
+
+class Classifier(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.LazyLinear(out_features=num_classes, bias=False)
+        self.softmax = nn.Softmax(dim=1)
+        
+    def forward(self, x):
+        x = self.global_avg_pool(x)
+        x = torch.flatten(x, 1) 
+        x = self.fc(x)
+        x = self.softmax(x)
+        return x   
+
+
+class BlockConfig(NamedTuple):
+    out_channels: int
+    num_blocks: int
+          
+
+class GroupConfig(NamedTuple):
+    block_config: List[BlockConfig]
+    width_multiplier: int = 1
+    groups: int = 3
+
+
+def create_group_blocks(*, out_channels, num_blocks, groups, 
+                        width_multiplier,
+                        **kwargs
+                        ):
+    blocks = []
+    for i in range(num_blocks):
+        if i == 0:
+            blocks.append(ShuffleNetDenseBlock(out_channels=out_channels, 
+                                              groups=groups, 
+                                              width_multiplier=width_multiplier,
+                                              **kwargs
+                                              )
+                          )
+        else:
+            blocks.append(ShuffleNetResidualBlock(out_channels=out_channels, 
+                                                groups=groups, 
+                                                width_multiplier=width_multiplier,
+                                                **kwargs
+                                                )
+                          )
+    return nn.Sequential(*blocks)
+
+
+def create_learner(*, configs: GroupConfig, **kwargs):
+    blocks = []
+    for block_config in configs.block_config:
+        blk = create_group_blocks(**block_config._asdict(),
+                                  **configs._asdict(),
+                                  **kwargs
+                                  )
+        blocks.append(blk)
+    return nn.Sequential(*blocks)
+
+def kernel_initializer(m, initializer_type="he_normal"):
+    if isinstance(m, nn.LazyConv2d) or isinstance(m, nn.LazyLinear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+        if initializer_type == "he_normal":
+            nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
+        elif initializer_type == "glorot_uniform":
+            nn.init.xavier_uniform_(m.weight)
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+
+
+def make_model(num_classes, learner_configs, data, device, initializer_type="he_normal"):
+    stem = ShuffleNetStem(out_channels=24)
+    learner_module = create_learner(configs=learner_configs)
+    classifier = Classifier(num_classes=num_classes)
+    data = data.to(device)
+    model = nn.Sequential(stem, learner_module, classifier).to(device)
+    _ = model(data)
+    model.apply(lambda m: kernel_initializer(m, initializer_type=initializer_type))
+    model = model.to(device)
+    return model
+
+
+if __name__ == "__main__":
+    data = torch.randn(1, 3, 224, 224)
+    block_config = [BlockConfig(out_channels=240, num_blocks=4),
+                    BlockConfig(out_channels=480, num_blocks=8),
+                    BlockConfig(out_channels=960, num_blocks=4)
+                    ]
+    group_config = GroupConfig(width_multiplier=1, groups=3, block_config=block_config)
+    
+    model = make_model(num_classes=1000, learner_configs=group_config, 
+                       data=data, device="cpu", initializer_type="he_normal")
+    summary(model, input_size=(1, 3, 224, 224))
+    
