@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.87.1 (2026-05-30)
+
+### Fix
+
+* fix: update shufflenet ([`b876f0c`](https://github.com/agbleze/mining_sites_detector/commit/b876f0cb70253dff67c72e5345ac9a4c6c979c10))
+
 ## v0.87.0 (2026-05-29)
 
 ### Feature
