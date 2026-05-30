@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.87.2 (2026-05-30)
+
+### Fix
+
+* fix: channel mismatch ([`dd6e303`](https://github.com/agbleze/mining_sites_detector/commit/dd6e303b19c75bbbfdbfda6ee8840dd5a1163c10))
+
 ## v0.87.1 (2026-05-30)
 
 ### Fix
