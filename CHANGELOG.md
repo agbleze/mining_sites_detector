@@ -1,6 +1,16 @@
 # CHANGELOG
 
+## v0.88.0 (2026-06-27)
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main ([`f62c1b9`](https://github.com/agbleze/mining_sites_detector/commit/f62c1b9279875af980111903f02b4127da185ff2))
+
 ## v0.87.2 (2026-05-30)
+
+### Feature
+
+* feat: add train_multi_seed ([`e0a633a`](https://github.com/agbleze/mining_sites_detector/commit/e0a633a4e300e015475e7f3c975932b710715870))
 
 ### Fix
 
