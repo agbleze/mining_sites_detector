@@ -495,8 +495,14 @@ def train_multi_seed(seeds, configs, checkpoint_path="ablation_results.pkl"):
         master_archive = {"configs": saved_configs,
                           "run_history": run_history
                           }
-        layer_arch = str(configs["layer_channels"])
-        filename = f"{layer_arch}_{current_seed}"
+        layer_arch = f"layers_{configs['layer_channels']}"
+        stride = f"stride_{configs['stride']}"
+        pool = f"pool_{configs['pool_type']}"
+        use_bn = f"use_bn_{configs['use_bn']}"
+        decoder_use_bn = f"decoder_use_bn_{configs['decoder_use_bn']}"
+        batch_size = f"batch_size_{configs['batch_size']}"
+        
+        filename = f"{layer_arch}_{stride}_{pool}_{use_bn}_{decoder_use_bn}_{batch_size}_seed_{current_seed}"
         checkpoint_path = f"{filename}.pkl"
         
         with open(checkpoint_path, "wb") as f:
@@ -639,7 +645,21 @@ def plot_manuscript_curves(run_history, num_epochs=3,
     plt.close() # Free memory blocks immediately
     print(f"==> Exported publication-ready chart securely to: {chart_output_path}")
     
+#%%
 
+# import pickle
+# import sys
+# import utils
+
+# #%%
+    
+    
+# #%%
+# ckpt = "/home/lin/codebase/mining_sites_detector/src/mining_sites_detector/[32]_9999.pkl"
+
+
+# with open(ckpt, "rb") as f:
+#     archive_1l = pickle.load(f)
 
 #%%
 if __name__ == "__main__":
@@ -649,15 +669,15 @@ if __name__ == "__main__":
     research_seeds = [42, 101, 223, 456, 789, 1111, 2024, 5555, 7777, 9999]
     
     # 2. Package your winning single-layer configuration parameters
-    experimental_configs  = {"layer_channels": [32],
+    experimental_configs  = {"layer_channels": [32, 64, 128],
                             "last_act_func": "sigmoid",       # Binds output to your [0.0, 1.0] ToTensor range
-                            "stride": 2,                      # Handles the 2x spatial downsampling via Conv
-                            "pool_type": "max",                # Crucial: Disabled to prevent accidental double-downsampling
+                            "stride": 1,                      # Handles the 2x spatial downsampling via Conv
+                            "pool_type": None,                # Crucial: Disabled to prevent accidental double-downsampling
                             "kernel_size": 3,
                             "decoder_kernel_size": 3,
-                            "decoder_stride": 2,              # Symmetrically handles the 2x upsampling
-                            "use_bn": False,                  # Keep disabled for the pure baseline run
-                            "decoder_use_bn": False,
+                            "decoder_stride": 1,              # Symmetrically handles the 2x upsampling
+                            "use_bn": True,                  # Keep disabled for the pure baseline run
+                            "decoder_use_bn": True,
                             "initializer_type": "he_normal", #"glorot_uniform"  # Optimal variance alignment for hidden ReLU activations
                             "no_grad": True,                   # Prevents early computation-graph optimization leakage
 
@@ -678,8 +698,32 @@ if __name__ == "__main__":
 
 
     #%%
+    # import pickle
+    
+    
+    # #%%
+    # ckpt = "/home/lin/codebase/mining_sites_detector/src/mining_sites_detector/[32]_9999.pkl"
+
+
+    # with open(ckpt, "rb") as f:
+    #     archive_1l = pickle.load(f)
+
+    #%%
+    
     
     
     #%%
-    plot_manuscript_curves(master_run_results)
+    #plot_manuscript_curves(master_run_results)
 # %%
+"""
+Hypothesis 1:
+Spatial dimension preservation is more important that feature expansion
+
+Under the arch setup of bn for both encoder and decoder and no pooling
+Stop all downsampling by setting stride to 1 and train for [32], [32, 64] and [32, 64, 128]
+allow downsampling by learning using stride = 2 only without pooling for [32], [32, 64], [32, 64, 128]
+
+
+
+
+"""
