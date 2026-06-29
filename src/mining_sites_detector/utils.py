@@ -669,9 +669,9 @@ if __name__ == "__main__":
     research_seeds = [42, 101, 223, 456, 789, 1111, 2024, 5555, 7777, 9999]
     
     # 2. Package your winning single-layer configuration parameters
-    experimental_configs  = {"layer_channels": [32, 64, 128],
+    experimental_configs  = {"layer_channels": [32, 64],
                             "last_act_func": "sigmoid",       # Binds output to your [0.0, 1.0] ToTensor range
-                            "stride": 1,                      # Handles the 2x spatial downsampling via Conv
+                            "stride": 2,                      # Handles the 2x spatial downsampling via Conv
                             "pool_type": None,                # Crucial: Disabled to prevent accidental double-downsampling
                             "kernel_size": 3,
                             "decoder_kernel_size": 3,
@@ -702,8 +702,6 @@ if __name__ == "__main__":
     
     
     # #%%
-    # ckpt = "/home/lin/codebase/mining_sites_detector/src/mining_sites_detector/[32]_9999.pkl"
-
 
     # with open(ckpt, "rb") as f:
     #     archive_1l = pickle.load(f)
@@ -727,3 +725,101 @@ allow downsampling by learning using stride = 2 only without pooling for [32], [
 
 
 """
+
+
+
+"""
+
+
+
+==> Exported publication-ready chart securely to: layers_[32, 64, 128]_stride_1_pool_None_use_bn_True_decoder_use_bn_True_seed_9999_convergence_profile.png
+
+======================================================================
+                MANUSCRIPT COMPILATION STATISTICS MATRIX
+======================================================================
+EPOCH    | MEAN TRN LOSS   (± 95% CI)   | MEAN VAL LOSS   (± 95% CI)
+----------------------------------------------------------------------
+Epoch 1   | 0.01062        (± 0.00004) | 0.00899        (± 0.00007)
+Epoch 2   | 0.00922        (± 0.00002) | 0.00893        (± 0.00016)
+Epoch 3   | 0.00899        (± 0.00002) | 0.00872        (± 0.00011)
+Epoch 4   | 0.00885        (± 0.00002) | 0.00869        (± 0.00008)
+Epoch 5   | 0.00876        (± 0.00002) | 0.00863        (± 0.00006)
+Epoch 6   | 0.00870        (± 0.00002) | 0.00863        (± 0.00007)
+Epoch 7   | 0.00864        (± 0.00005) | 0.00851        (± 0.00007)
+Epoch 8   | 0.00861        (± 0.00005) | 0.00850        (± 0.00010)
+Epoch 9   | 0.00857        (± 0.00006) | 0.00845        (± 0.00008)
+Epoch 10  | 0.00853        (± 0.00007) | 0.00846        (± 0.00009)
+======================================================================
+
+
+
+
+==> Exported publication-ready chart securely to: layers_[32, 64]_stride_1_pool_None_use_bn_True_decoder_use_bn_True_batch_size_32_seed_9999_convergence_profile.png
+
+======================================================================
+                MANUSCRIPT COMPILATION STATISTICS MATRIX
+======================================================================
+EPOCH    | MEAN TRN LOSS   (± 95% CI)   | MEAN VAL LOSS   (± 95% CI)
+----------------------------------------------------------------------
+Epoch 1   | 0.00884        (± 0.00003) | 0.00720        (± 0.00010)
+Epoch 2   | 0.00744        (± 0.00002) | 0.00703        (± 0.00008)
+Epoch 3   | 0.00721        (± 0.00002) | 0.00690        (± 0.00007)
+Epoch 4   | 0.00710        (± 0.00002) | 0.00693        (± 0.00007)
+Epoch 5   | 0.00703        (± 0.00002) | 0.00685        (± 0.00008)
+Epoch 6   | 0.00698        (± 0.00002) | 0.00686        (± 0.00011)
+Epoch 7   | 0.00691        (± 0.00003) | 0.00678        (± 0.00010)
+Epoch 8   | 0.00687        (± 0.00004) | 0.00674        (± 0.00009)
+Epoch 9   | 0.00684        (± 0.00004) | 0.00675        (± 0.00009)
+Epoch 10  | 0.00682        (± 0.00005) | 0.00671        (± 0.00005)
+======================================================================
+
+
+
+
+==> Exported publication-ready chart securely to: layers_[32]_stride_1_pool_None_use_bn_True_decoder_use_bn_True_batch_size_32_seed_9999_convergence_profile.png
+
+======================================================================
+                MANUSCRIPT COMPILATION STATISTICS MATRIX
+======================================================================
+EPOCH    | MEAN TRN LOSS   (± 95% CI)   | MEAN VAL LOSS   (± 95% CI)
+----------------------------------------------------------------------
+Epoch 1   | 0.00637        (± 0.00006) | 0.00453        (± 0.00005)
+Epoch 2   | 0.00487        (± 0.00002) | 0.00437        (± 0.00005)
+Epoch 3   | 0.00469        (± 0.00002) | 0.00437        (± 0.00010)
+Epoch 4   | 0.00458        (± 0.00002) | 0.00421        (± 0.00003)
+Epoch 5   | 0.00450        (± 0.00002) | 0.00421        (± 0.00005)
+Epoch 6   | 0.00444        (± 0.00002) | 0.00415        (± 0.00002)
+Epoch 7   | 0.00441        (± 0.00002) | 0.00417        (± 0.00004)
+Epoch 8   | 0.00438        (± 0.00001) | 0.00415        (± 0.00005)
+Epoch 9   | 0.00436        (± 0.00001) | 0.00415        (± 0.00005)
+Epoch 10  | 0.00435        (± 0.00002) | 0.00418        (± 0.00006)
+======================================================================
+
+
+
+
+
+
+
+
+==> Exported publication-ready chart securely to: layers_[32]_stride_2_pool_None_use_bn_True_decoder_use_bn_True_batch_size_32_seed_9999_convergence_profile.png
+
+======================================================================
+                MANUSCRIPT COMPILATION STATISTICS MATRIX
+======================================================================
+EPOCH    | MEAN TRN LOSS   (± 95% CI)   | MEAN VAL LOSS   (± 95% CI)
+----------------------------------------------------------------------
+Epoch 1   | 0.01005        (± 0.00008) | 0.00785        (± 0.00007)
+Epoch 2   | 0.00813        (± 0.00001) | 0.00769        (± 0.00012)
+Epoch 3   | 0.00794        (± 0.00001) | 0.00757        (± 0.00007)
+Epoch 4   | 0.00785        (± 0.00002) | 0.00748        (± 0.00006)
+Epoch 5   | 0.00779        (± 0.00002) | 0.00742        (± 0.00003)
+Epoch 6   | 0.00776        (± 0.00002) | 0.00743        (± 0.00006)
+Epoch 7   | 0.00772        (± 0.00002) | 0.00738        (± 0.00004)
+Epoch 8   | 0.00768        (± 0.00003) | 0.00739        (± 0.00006)
+Epoch 9   | 0.00766        (± 0.00002) | 0.00743        (± 0.00011)
+Epoch 10  | 0.00763        (± 0.00002) | 0.00736        (± 0.00005)
+======================================================================
+
+"""
+
