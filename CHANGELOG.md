@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.91.0 (2026-06-30)
+
+### Feature
+
+* feat: update utils ([`cd4f9cd`](https://github.com/agbleze/mining_sites_detector/commit/cd4f9cd894e67cfe0d4c52611eb05716e9885ae6))
+
 ## v0.90.0 (2026-06-29)
 
 ### Feature
