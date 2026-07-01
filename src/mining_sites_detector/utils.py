@@ -697,21 +697,6 @@ if __name__ == "__main__":
     compile_manuscript_metrics(master_run_results, num_epochs=experimental_configs["num_epochs"])
 
 
-    #%%
-    # import pickle
-    
-    
-    # #%%
-
-    # with open(ckpt, "rb") as f:
-    #     archive_1l = pickle.load(f)
-
-    #%%
-    
-    
-    
-    #%%
-    #plot_manuscript_curves(master_run_results)
 # %%
 """
 Hypothesis 1:
