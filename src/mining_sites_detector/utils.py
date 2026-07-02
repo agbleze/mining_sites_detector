@@ -520,7 +520,6 @@ def train_multi_seed(seeds, configs, checkpoint_path="ablation_results.pkl"):
 
 
 
-import scipy.stats as stats
 
 def compile_manuscript_metrics(run_history, num_epochs=10):
     """
@@ -645,13 +644,7 @@ def plot_manuscript_curves(run_history, num_epochs=3,
     plt.close() # Free memory blocks immediately
     print(f"==> Exported publication-ready chart securely to: {chart_output_path}")
     
-#%%
 
-# import pickle
-# import sys
-# import utils
-
-# #%%
     
     
 # #%%
