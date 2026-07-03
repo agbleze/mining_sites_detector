@@ -9,13 +9,15 @@ import torch.nn as nn
 from torchinfo import summary
 from copy import deepcopy
 from torch_snippets import Report
-import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 import json
 import pickle
 import os
 from torchvision import datasets, transforms
+import random
+from torch.utils.data import Dataset, DataLoader
+
 
             
 def kernel_initializer(m, initializer_type="he_normal", no_grad=True):
@@ -255,7 +257,6 @@ class GaussianNoise:
 
 
 
-from torch.utils.data import Dataset, DataLoader
 
 # 1. A clean wrapper to return the dual (noisy, clean) inputs your loops expect
 class PairedDenoisingDataset(Dataset):
@@ -351,7 +352,6 @@ def setup_data_pipeline(seed, batch_size, sigma=25, device="cuda", **kwargs):
 
 
 
-import random
 def set_seed(seed=42):
     random.seed(seed)
     np.random.seed(seed)
