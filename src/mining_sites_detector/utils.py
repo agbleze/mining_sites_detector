@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import json
 import pickle
 import os
+from torchvision import datasets, transforms
 
             
 def kernel_initializer(m, initializer_type="he_normal", no_grad=True):
@@ -254,8 +255,6 @@ class GaussianNoise:
 
 
 
-import torch
-from torchvision import datasets, transforms
 from torch.utils.data import Dataset, DataLoader
 
 # 1. A clean wrapper to return the dual (noisy, clean) inputs your loops expect
