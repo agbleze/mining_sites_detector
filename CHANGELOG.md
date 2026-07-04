@@ -1,10 +1,34 @@
 # CHANGELOG
 
+## v0.92.0 (2026-07-04)
+
+### Feature
+
+* feat: update utils ([`4c718f5`](https://github.com/agbleze/mining_sites_detector/commit/4c718f503b8fb70519eb16ae6d7ead66331404d7))
+
+### Style
+
+* style: move imports to top of file ([`aa3f19e`](https://github.com/agbleze/mining_sites_detector/commit/aa3f19e28006204f571b9a6ce0300a0fc084d4f3))
+
+* style: remov multiple imports ([`595c598`](https://github.com/agbleze/mining_sites_detector/commit/595c598f11bd618ac16180eeaf52d7d7f97fd2e1))
+
+* style: rmove unused imports ([`32a6f3b`](https://github.com/agbleze/mining_sites_detector/commit/32a6f3bce74a604b95d8e148734da3222a6d73fe))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/agbleze/mining_sites_detector into main
+
+update ([`729c530`](https://github.com/agbleze/mining_sites_detector/commit/729c530d99da69fa3a76855a77797d30275baba7))
+
 ## v0.91.0 (2026-06-30)
 
 ### Feature
 
 * feat: update utils ([`cd4f9cd`](https://github.com/agbleze/mining_sites_detector/commit/cd4f9cd894e67cfe0d4c52611eb05716e9885ae6))
+
+### Style
+
+* style: remove comments ([`90b4bbf`](https://github.com/agbleze/mining_sites_detector/commit/90b4bbf23e59d17a70063e3c4999d381c6f3cdc6))
 
 ## v0.90.0 (2026-06-29)
 
