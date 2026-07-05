@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.93.0 (2026-07-05)
+
+### Feature
+
+* feat: add linear probe of checkpoints ([`c040ac5`](https://github.com/agbleze/mining_sites_detector/commit/c040ac5c6d6e5f249eb1fe93e73cddf765eb2273))
+
 ## v0.92.0 (2026-07-04)
 
 ### Feature
