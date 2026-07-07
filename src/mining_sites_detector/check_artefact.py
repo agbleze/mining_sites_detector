@@ -1,4 +1,3 @@
-#%%
 import pickle
 import sys
 import utils
@@ -22,12 +21,6 @@ ckpt = "/home/lin/codebase/mining_sites_detector/src/mining_sites_detector/[32]_
 with open(ckpt, "rb") as f:
     archive_1l = pickle.load(f)
 
-# %%
-archive_1l['configs']
-
-
-# %%
-archive_1l.keys()
 # %%
 run_history = archive_1l["run_history"]
 # %%
