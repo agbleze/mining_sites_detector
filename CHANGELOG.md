@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.95.0 (2026-07-07)
+
+### Feature
+
+* feat: remove unused code ([`737e7e3`](https://github.com/agbleze/mining_sites_detector/commit/737e7e3a8f40d4b5b68bea02e41f01b41d16dfb6))
+
 ## v0.94.0 (2026-07-06)
 
 ### Feature
