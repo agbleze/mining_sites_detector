@@ -10,8 +10,25 @@ from torchvision import datasets, transforms
 import os
 from glob import glob
 import json
+from utils import setup_data_pipeline
 
 sys.modules['__main__'] = utils
+
+
+
+def evaluate_model(model, dataloader, criterion, device="cuda"):
+    _, test_loader, test_generator =setup_data_pipeline(seed=1)
+    
+    N = len(test_loader)
+    running_test_loss = 0.0
+    model.eval()
+    
+    test_generator.manual_seed(1)
+    for ix, data in enumerate(test_loader):
+        loss = validate_batch(data, model, criterion, device=device)
+        running_test_loss += loss.item()
+    test_loss = running_test_loss / N
+    return test_loss
 
 
 def probe_dataloader(batch_size=64):
