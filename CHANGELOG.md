@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.96.0 (2026-07-08)
+
+### Feature
+
+* feat: add evaluate_model ([`d885266`](https://github.com/agbleze/mining_sites_detector/commit/d8852661de62d8b6cc3b77aa39aa888367c31447))
+
 ## v0.95.0 (2026-07-07)
 
 ### Feature
