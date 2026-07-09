@@ -10,7 +10,7 @@ from torchvision import datasets, transforms
 import os
 from glob import glob
 import json
-from utils import setup_data_pipeline
+from utils import setup_data_pipeline, validate_batch
 
 sys.modules['__main__'] = utils
 
