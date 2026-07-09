@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.97.0 (2026-07-09)
+
+### Feature
+
+* feat: add validate_batch ([`2c1c8e1`](https://github.com/agbleze/mining_sites_detector/commit/2c1c8e13321851c4e8b450f204ecb088331f4130))
+
 ## v0.96.0 (2026-07-08)
 
 ### Feature
