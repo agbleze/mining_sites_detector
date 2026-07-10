@@ -24,6 +24,8 @@ $ pip install mining_sites_detector
 
 ## Usage
 
+#### Linear probing
+
 ### Dataset required
 
 #### Satellite image dataset
