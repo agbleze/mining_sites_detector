@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.98.0 (2026-07-11)
+
+### Feature
+
+* feat: update evaluate_multi_seed ([`5a2ec66`](https://github.com/agbleze/mining_sites_detector/commit/5a2ec6654730e00c790030f9a740d83b12a95096))
+
+### Unknown
+
+* Update README with linear probing and dataset info
+
+Add section for linear probing and dataset requirements ([`4e6b997`](https://github.com/agbleze/mining_sites_detector/commit/4e6b9972e3e9f2ed7aea3aeca1602f931126960b))
+
 ## v0.97.0 (2026-07-09)
 
 ### Feature
