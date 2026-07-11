@@ -137,6 +137,11 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
                                     "seed": current_seed,
                                     "test_accuracy": test_accuracy
                                     }
+        
+        evaluate_model(model=encoder, dataloader=test_loader, 
+                       criterion=torch.nn.CrossEntropyLoss(), 
+                       device=device
+                       )
     _test_acc = np.array(test_acc)
     num_runs = len(_test_acc)
     mean_acc = np.mean(test_acc)
