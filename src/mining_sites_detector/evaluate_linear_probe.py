@@ -132,7 +132,8 @@ def evaluate_encoder(encoder, train_loader, test_loader, device="cuda"):
 
 
 def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
-                        research_seeds = [42, 101, 223, 456, 789, 1111, 2024, 5555, 7777, 9999]
+                        research_seeds = [42, 101, 223, 456, 789, 1111, 2024, 5555, 7777, 9999],
+                        save_dir = "/home/lin/codebase/data_store/linear_probe"
                         ):
 
     with open(checkpoint_path, "rb") as f:
@@ -153,6 +154,7 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
     probe_history = {}
     seeds = []
     probe_checkpoint_path = f"{layer_arch}_{stride}_{pool}_{use_bn}_{decoder_use_bn}_{_batch_size}.pkl"
+    probe_checkpoint_path = os.path.join(save_dir, probe_checkpoint_path)
 
     eval_history = {}
     test_losses = []
@@ -293,6 +295,7 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
 
 def main():
     curr_folder = "/home/lin/codebase/mining_sites_detector/src/mining_sites_detector"
+    save_dir = "/home/lin/codebase/data_store/linear_probe"
     completed_linear_probe_path = os.path.join(curr_folder, "evaluated_model_and_linear_probe_checkpoints.json")
     
     if os.path.exists(completed_linear_probe_path):
@@ -313,7 +316,10 @@ def main():
         for ckpt_file in full_checkpoint_files:
             if ckpt_file not in completed_linear_probe:
                 print(f"\n[INFO] Processing checkpoint: {ckpt_file}")
-                evaluate_multi_seed(ckpt_file, batch_size=32, device="cuda")
+                evaluate_multi_seed(ckpt_file, batch_size=32, 
+                                    device="cuda",
+                                    save_dir=save_dir,
+                                    )
                 completed_linear_probe.append(ckpt_file)
             else:
                 print(f"[INFO] Skipping already completed checkpoint: {ckpt_file}")
