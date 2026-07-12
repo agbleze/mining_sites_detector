@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.99.0 (2026-07-12)
+
+### Feature
+
+* feat: add evaluate_unsupervised_clustering ([`effc17e`](https://github.com/agbleze/mining_sites_detector/commit/effc17e022d88e558f4629cb0ed8ca050a63f072))
+
 ## v0.98.0 (2026-07-11)
 
 ### Feature
