@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.100.0 (2026-07-12)
+
+### Feature
+
+* feat: update evaluate_multi_seed ([`057942e`](https://github.com/agbleze/mining_sites_detector/commit/057942e685b91944b182197f89460d1db5b04ff4))
+
 ## v0.99.0 (2026-07-12)
 
 ### Feature
