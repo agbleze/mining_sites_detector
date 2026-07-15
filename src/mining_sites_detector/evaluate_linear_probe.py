@@ -13,41 +13,74 @@ import json
 from utils import setup_data_pipeline, validate_batch
 from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score
 from sklearn.cluster import KMeans
+from sklearn.cluster import MiniBatchKMeans
 import gc
 
 sys.modules['__main__'] = utils
 
 
-def evaluate_unsupervised_clustering(encoder, test_loader, 
-                                     device="cuda"
+def evaluate_unsupervised_clustering(encoder, train_loader, test_loader, 
+                                     batch_size=32,
+                                     device="cuda",
+                                     use_minibatch_kmeans: bool = True
                                      ):
         
     encoder.to(device)
     encoder.eval()
     
-    all_features = []
-    all_labels = []
+    print(f"[INFO] Initializing Clustering Map | use_minibatch_kmeans: {use_minibatch_kmeans}")
     
+    if not use_minibatch_kmeans:
+        all_features = []
+        kmeans = KMeans(n_clusters=10, random_state=42, n_init="auto")
+    else:
+        kmeans = MiniBatchKMeans(n_clusters=10, random_state=42,
+                                 batch_size=batch_size,
+                                 n_init="auto",
+                                 )
+        
+    print(f" -> Fitting Clustering Hyperplanes across Train Partition...")
     with torch.no_grad():
-        for images, labels in test_loader:
+        for images, labels in train_loader:
             images = images.to(device)
             features = encoder(images)
-            features = features.view(features.size(0), -1)
-            all_features.append(features.cpu().numpy())
-            all_labels.append(labels.numpy())
+            features_flat = features.view(features.size(0), -1).contiguous().cpu().numpy()
+            
+            if not use_minibatch_kmeans:
+                all_features.append(features_flat)
+                
+            else:
+                kmeans.partial_fit(features_flat)
+                #print(f"Partial fit of MiniBatch kmeans successfully")
+            #all_labels.append(labels.numpy())
 
-    all_features = np.concatenate(all_features, axis=0)
-    all_labels = np.concatenate(all_labels, axis=0)
+    if not use_minibatch_kmeans:
+        all_features = np.concatenate(all_features, axis=0)
+        kmeans.fit(all_features)
+        del all_features
     
-    kmeans = KMeans(n_clusters=10, random_state=42, n_init="auto")
-    y_pred = kmeans.fit_predict(all_features)
+    print(f" -> Compiling Unsupervised Predictions across Test Partition...")
+    test_ground_truths = []
+    test_pred = []
+    with torch.no_grad():
+        for images, labels in test_loader:
+            test_ground_truths.append(labels.numpy())
+            images = images.to(device)
+            features = encoder(images)
+            features = features.view(features.size(0), -1).contiguous().cpu().numpy()
+            y_pred = kmeans.predict(features)
+            test_pred.append(y_pred)
+            
+    all_labels = np.concatenate(test_ground_truths, axis=0)     
+    all_predictions =  np.concatenate(test_pred, axis=0)
     
-    nmi_score = normalized_mutual_info_score(all_labels, y_pred)
-    ari_score = adjusted_rand_score(all_labels, y_pred)
+    nmi_score = normalized_mutual_info_score(all_labels, all_predictions)
+    ari_score = adjusted_rand_score(all_labels, all_predictions)
     return nmi_score, ari_score
 
 
 def evaluate_clustering_multi_seed(checkpoint_path, batch_size=32, device="cuda",
+                                   use_minibatch_kmeans: bool = True,
                                     research_seeds = [42, 101, 223, 456, 789, 1111, 2024, 5555, 7777, 9999],
                                     save_dir = "/home/lin/codebase/data_store/linear_probe"
                                     ):
@@ -85,7 +118,10 @@ def evaluate_clustering_multi_seed(checkpoint_path, batch_size=32, device="cuda"
 
         
         nmi_score, ari_score = evaluate_unsupervised_clustering(encoder=encoder, 
-                                                                test_loader=test_loader
+                                                                batch_size=batch_size,
+                                                                train_loader=train_loader,
+                                                                test_loader=test_loader,
+                                                                device=device
                                                                 )
         test_nmi_scores.append(nmi_score)
         test_ari_scores.append(ari_score)
