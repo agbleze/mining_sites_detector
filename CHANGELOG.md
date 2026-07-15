@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.101.0 (2026-07-15)
+
+### Feature
+
+* feat: add evaluate_clustering_multi_seed ([`6f0af08`](https://github.com/agbleze/mining_sites_detector/commit/6f0af0855eb82334343bf621b82338cf716492a6))
+
+### Style
+
+* style: commented out clustering ([`0bfa420`](https://github.com/agbleze/mining_sites_detector/commit/0bfa420d140a2b173562cd53e532130fbfd69edc))
+
 ## v0.100.0 (2026-07-12)
 
 ### Feature
