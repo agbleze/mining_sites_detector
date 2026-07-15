@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.101.1 (2026-07-15)
+
+### Fix
+
+* fix: update evaluate_unsupervised_clustering ([`5003784`](https://github.com/agbleze/mining_sites_detector/commit/50037840380a48039d063547765eddcb0730ae7e))
+
 ## v0.101.0 (2026-07-15)
 
 ### Feature
