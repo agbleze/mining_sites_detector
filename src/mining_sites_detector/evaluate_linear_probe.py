@@ -46,6 +46,121 @@ def evaluate_unsupervised_clustering(encoder, test_loader,
     ari_score = adjusted_rand_score(all_labels, y_pred)
     return nmi_score, ari_score
 
+
+def evaluate_clustering_multi_seed(checkpoint_path, batch_size=32, device="cuda",
+                                    research_seeds = [42, 101, 223, 456, 789, 1111, 2024, 5555, 7777, 9999],
+                                    save_dir = "/home/lin/codebase/data_store/linear_probe"
+                                    ):
+    with open(checkpoint_path, "rb") as f:
+        model_chpt = pickle.load(f)
+        
+    configs = model_chpt['configs']
+    
+    layer_arch = f"cluster_probe_layers_{configs['layer_channels']}"
+    stride = f"stride_{configs['stride']}"
+    pool = f"pool_{configs['pool_type']}"
+    use_bn = f"use_bn_{configs['use_bn']}"
+    decoder_use_bn = f"decoder_use_bn_{configs['decoder_use_bn']}"
+    _batch_size = f"batch_size_{configs['batch_size']}"
+    
+    run_history = model_chpt["run_history"]
+    seeds = []
+    probe_checkpoint_path = f"{layer_arch}_{stride}_{pool}_{use_bn}_{decoder_use_bn}_{_batch_size}.pkl"
+    probe_checkpoint_path = os.path.join(save_dir, probe_checkpoint_path)
+    
+    cluster_history = {}
+    test_nmi_scores = []
+    test_ari_scores = []
+    
+    train_loader, test_loader = probe_dataloader(batch_size=batch_size)
+    
+    for seed_key, model_obj in run_history.items():
+        current_seed = research_seeds[seed_key-1]
+        
+        print(f"\n[INFO] Evaluating Linear Probe for Seed {current_seed}...")
+        encoder = model_obj["model"].encoder
+        print(f"Clustering Probe : {probe_checkpoint_path}")
+        seeds.append(current_seed)
+        
+
+        
+        nmi_score, ari_score = evaluate_unsupervised_clustering(encoder=encoder, 
+                                                                test_loader=test_loader
+                                                                )
+        test_nmi_scores.append(nmi_score)
+        test_ari_scores.append(ari_score)
+        
+        print(f" ===> Seed {current_seed}: NMI Score: {nmi_score:.5f}, ARI Score: {ari_score:.5f}")
+        
+        
+        cluster_history[seed_key] = {"model": encoder.cpu(),
+                                     "seed": current_seed,
+                                     "nmi_score": nmi_score,
+                                     "ari_score": ari_score
+                                     }
+        
+        
+        torch.cuda.empty_cache()
+    
+    _test_nmi_scores = np.array(test_nmi_scores)
+    num_runs = len(_test_nmi_scores)
+
+    mean_nmi = np.mean(test_nmi_scores)
+    std_nmi = np.std(test_nmi_scores, ddof=1) if num_runs > 1 else 0.0
+    
+    _test_ari_scores = np.array(test_ari_scores)
+    mean_ari = np.mean(test_ari_scores)
+    std_ari = np.std(test_ari_scores, ddof=1) if num_runs > 1 else 0.0
+
+    if num_runs > 1:
+        df = num_runs - 1
+        critical_t = stats.t.ppf(0.975, df)
+        
+        sem_nmi = stats.sem(_test_nmi_scores)
+        ci_nmi = critical_t * sem_nmi
+        
+        sem_ari = stats.sem(_test_ari_scores)
+        ci_ari = critical_t * sem_ari
+    else:
+        ci_nmi = 0.0
+        ci_ari = 0.0
+        
+    master_archive = {"configs": configs,
+                        "cluster_history": cluster_history,
+                        "test_nmi_scores": test_nmi_scores,
+                        "mean_test_nmi": mean_nmi,
+                        "std_test_nmi": std_nmi,
+                        "CI_95_test_nmi": ci_nmi,
+                        
+                        "test_ari_scores": test_ari_scores,
+                        "mean_test_ari": mean_ari,
+                        "std_test_ari": std_ari,
+                        "CI_95_test_ari": ci_ari
+                    }
+        
+    with open(probe_checkpoint_path, "wb") as f:
+        pickle.dump(master_archive, f)
+        
+    
+    print(f"\n" + "="*80)
+    print(f"SUCCESS: Master Downstream Clustering Probe Suite Compiled Securely.")
+    print(f"\n[COMPLETE] Clustering probe completed for all seeds. checkpoint: {probe_checkpoint_path}")
+    print(f"Target Output Path : {probe_checkpoint_path}")
+
+    print(f"Aggregate NMI Score : {mean_nmi:.4f} (± Sample Std Dev: {std_nmi:.4f})")
+    print(f"All seeds MEAN TEST NMI  : {mean_nmi:.4f} (± 95% CI: {ci_nmi:.4f})  [Std Dev: {std_nmi:.4f}]")
+    print(f"Aggregate ARI Score : {mean_ari:.4f} (± Sample Std Dev: {std_ari:.4f})")
+    print(f"All seeds MEAN TEST ARI  : {mean_ari:.4f} (± 95% CI: {ci_ari:.4f})  [Std Dev: {std_ari:.4f}]")  
+    
+    print("="*80 + "\n")
+    
+    gc.collect()
+    torch.cuda.empty_cache()
+
+
+
+
+
 def evaluate_model(model, criterion, batch_size, 
                    device="cuda",
                    ): 
@@ -306,10 +421,13 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
 
 
 
-def main():
+def main(clustering_probe=True):
     curr_folder = "/home/lin/codebase/mining_sites_detector/src/mining_sites_detector"
     save_dir = "/home/lin/codebase/data_store/linear_probe"
-    completed_linear_probe_path = os.path.join(curr_folder, "evaluated_model_and_linear_probe_checkpoints.json")
+    checkpoint_file = "evaluated_model_and_linear_probe_checkpoints.json"
+    if clustering_probe:
+        checkpoint_file = "clustering_probe_checkpoints.json"
+    completed_linear_probe_path = os.path.join(curr_folder, checkpoint_file)
     
     if os.path.exists(completed_linear_probe_path):
         with open(completed_linear_probe_path, "r") as f:
@@ -329,10 +447,16 @@ def main():
         for ckpt_file in full_checkpoint_files:
             if ckpt_file not in completed_linear_probe:
                 print(f"\n[INFO] Processing checkpoint: {ckpt_file}")
-                evaluate_multi_seed(ckpt_file, batch_size=32, 
-                                    device="cuda",
-                                    save_dir=curr_folder, #save_dir,
-                                    )
+                if clustering_probe:
+                    evaluate_clustering_multi_seed(ckpt_file, batch_size=32, 
+                                                    device="cuda",
+                                                    save_dir=curr_folder, 
+                                                   )
+                else:
+                    evaluate_multi_seed(ckpt_file, batch_size=32, 
+                                        device="cuda",
+                                        save_dir=curr_folder, #save_dir,
+                                        )
                 completed_linear_probe.append(ckpt_file)
                 
                 gc.collect()
@@ -351,4 +475,4 @@ def main():
             
         
 if __name__ == "__main__":
-    main()
+    main(clustering_probe=True)
