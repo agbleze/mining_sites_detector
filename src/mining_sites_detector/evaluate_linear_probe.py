@@ -288,7 +288,8 @@ def evaluate_encoder(encoder, train_loader, test_loader, device="cuda"):
 
 def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
                         research_seeds = [42, 101, 223, 456, 789, 1111, 2024, 5555, 7777, 9999],
-                        save_dir = "/home/lin/codebase/data_store/linear_probe"
+                        save_dir = "/home/lin/codebase/data_store/linear_probe",
+                        clustering_probe=True
                         ):
 
     with open(checkpoint_path, "rb") as f:
@@ -296,7 +297,7 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
         
     configs = model_chpt['configs']
     
-    layer_arch = f"eval_linearprobe_layers_{configs['layer_channels']}"
+    layer_arch = f"cluster_eval_linearprobe_layers_{configs['layer_channels']}"
     stride = f"stride_{configs['stride']}"
     pool = f"pool_{configs['pool_type']}"
     use_bn = f"use_bn_{configs['use_bn']}"
@@ -347,25 +348,29 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
         print(f" ===> Seed {current_seed}: Test Loss: {test_loss:.5f}")
         
         model.cpu()
-        # eval_history[seed_key] = {"model": model,
-        #                           "seed": current_seed,
-        #                           "test_loss": test_loss
-        #                           }
+        eval_history[seed_key] = {"model": model,
+                                  "seed": current_seed,
+                                  "test_loss": test_loss
+                                  }
         
-        # nmi_score, ari_score = evaluate_unsupervised_clustering(encoder=encoder, 
-        #                                                         test_loader=test_loader
-        #                                                         )
-        # test_nmi_scores.append(nmi_score)
-        # test_ari_scores.append(ari_score)
+        nmi_score, ari_score = evaluate_unsupervised_clustering(encoder=encoder, 
+                                                                train_loader=train_loader,
+                                                                test_loader=test_loader,
+                                                                batch_size=batch_size,
+                                                                device=device,
+                                                                use_minibatch_kmeans=True
+                                                                )
+        test_nmi_scores.append(nmi_score)
+        test_ari_scores.append(ari_score)
         
-        # print(f" ===> Seed {current_seed}: NMI Score: {nmi_score:.5f}, ARI Score: {ari_score:.5f}")
+        print(f" ===> Seed {current_seed}: NMI Score: {nmi_score:.5f}, ARI Score: {ari_score:.5f}")
         
         
-        # cluster_history[seed_key] = {"model": model,
-        #                              "seed": current_seed,
-        #                              "nmi_score": nmi_score,
-        #                              "ari_score": ari_score
-        #                              }
+        cluster_history[seed_key] = {"model": encoder.cpu(),
+                                     "seed": current_seed,
+                                     "nmi_score": nmi_score,
+                                     "ari_score": ari_score
+                                     }
         
         
         torch.cuda.empty_cache()
@@ -378,13 +383,13 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
     mean_loss = np.mean(test_losses)
     std_loss = np.std(test_losses, ddof=1) if num_runs > 1 else 0.0
     
-    # _test_nmi_scores = np.array(test_nmi_scores)
-    # mean_nmi = np.mean(test_nmi_scores)
-    # std_nmi = np.std(test_nmi_scores, ddof=1) if num_runs > 1 else 0.0
+    _test_nmi_scores = np.array(test_nmi_scores)
+    mean_nmi = np.mean(test_nmi_scores)
+    std_nmi = np.std(test_nmi_scores, ddof=1) if num_runs > 1 else 0.0
     
-    # _test_ari_scores = np.array(test_ari_scores)
-    # mean_ari = np.mean(test_ari_scores)
-    # std_ari = np.std(test_ari_scores, ddof=1) if num_runs > 1 else 0.0
+    _test_ari_scores = np.array(test_ari_scores)
+    mean_ari = np.mean(test_ari_scores)
+    std_ari = np.std(test_ari_scores, ddof=1) if num_runs > 1 else 0.0
 
     if num_runs > 1:
         df = num_runs - 1
@@ -395,16 +400,16 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
         sem_loss = stats.sem(_test_losses)
         ci_loss = critical_t * sem_loss
         
-        # sem_nmi = stats.sem(_test_nmi_scores)
-        # ci_nmi = critical_t * sem_nmi
+        sem_nmi = stats.sem(_test_nmi_scores)
+        ci_nmi = critical_t * sem_nmi
         
-        # sem_ari = stats.sem(_test_ari_scores)
-        # ci_ari = critical_t * sem_ari
+        sem_ari = stats.sem(_test_ari_scores)
+        ci_ari = critical_t * sem_ari
     else:
         ci_acc = 0.0
         ci_loss = 0.0
-        # ci_nmi = 0.0
-        # ci_ari = 0.0
+        ci_nmi = 0.0
+        ci_ari = 0.0
         
     master_archive = {"configs": configs,
                     "probe_history": probe_history,
@@ -419,15 +424,15 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
                     "std_test_loss": std_loss,
                     "CI_95_test_loss": ci_loss,
                     
-                    # "cluster_history": cluster_history,
-                    # "test_nmi_scores": test_nmi_scores,
-                    # "mean_test_nmi": mean_nmi,
-                    # "std_test_nmi": std_nmi,
-                    # "CI_95_test_nmi": ci_nmi,
-                    # "test_ari_scores": test_ari_scores,
-                    # "mean_test_ari": mean_ari,
-                    # "std_test_ari": std_ari,
-                    # "CI_95_test_ari": ci_ari
+                    "cluster_history": cluster_history,
+                    "test_nmi_scores": test_nmi_scores,
+                    "mean_test_nmi": mean_nmi,
+                    "std_test_nmi": std_nmi,
+                    "CI_95_test_nmi": ci_nmi,
+                    "test_ari_scores": test_ari_scores,
+                    "mean_test_ari": mean_ari,
+                    "std_test_ari": std_ari,
+                    "CI_95_test_ari": ci_ari
                     }
         
     with open(probe_checkpoint_path, "wb") as f:
@@ -444,14 +449,14 @@ def evaluate_multi_seed(checkpoint_path, batch_size=64, device="cuda",
     print(f"Aggregate Loss Matrix : {mean_loss:.4f} (± Sample Std Dev: {std_loss:.4f})")
     print(f"All seeds MEAN TEST LOSS  : {mean_loss:.4f} (± 95% CI: {ci_loss:.4f})  [Std Dev: {std_loss:.4f}]")
     
-    # print(f"Aggregate NMI Score : {mean_nmi:.4f} (± Sample Std Dev: {std_nmi:.4f})")
-    # print(f"All seeds MEAN TEST NMI  : {mean_nmi:.4f} (± 95% CI: {ci_nmi:.4f})  [Std Dev: {std_nmi:.4f}]")
-    # print(f"Aggregate ARI Score : {mean_ari:.4f} (± Sample Std Dev: {std_ari:.4f})")
-    # print(f"All seeds MEAN TEST ARI  : {mean_ari:.4f} (± 95% CI: {ci_ari:.4f})  [Std Dev: {std_ari:.4f}]")  
+    print(f"Aggregate NMI Score : {mean_nmi:.4f} (± Sample Std Dev: {std_nmi:.4f})")
+    print(f"All seeds MEAN TEST NMI  : {mean_nmi:.4f} (± 95% CI: {ci_nmi:.4f})  [Std Dev: {std_nmi:.4f}]")
+    print(f"Aggregate ARI Score : {mean_ari:.4f} (± Sample Std Dev: {std_ari:.4f})")
+    print(f"All seeds MEAN TEST ARI  : {mean_ari:.4f} (± 95% CI: {ci_ari:.4f})  [Std Dev: {std_ari:.4f}]")  
     
     print("="*80 + "\n")
     
-    #del model_chpt, run_history, master_archive, eval_history, probe_history, cluster_history
+    del model_chpt, run_history, master_archive, eval_history, probe_history, cluster_history
     gc.collect()
     torch.cuda.empty_cache()
 
@@ -462,7 +467,7 @@ def main(clustering_probe=True):
     save_dir = "/home/lin/codebase/data_store/linear_probe"
     checkpoint_file = "evaluated_model_and_linear_probe_checkpoints.json"
     if clustering_probe:
-        checkpoint_file = "clustering_probe_checkpoints.json"
+        checkpoint_file = "clustering_linear_probe_checkpoints.json"
     completed_linear_probe_path = os.path.join(curr_folder, checkpoint_file)
     
     if os.path.exists(completed_linear_probe_path):
@@ -483,16 +488,17 @@ def main(clustering_probe=True):
         for ckpt_file in full_checkpoint_files:
             if ckpt_file not in completed_linear_probe:
                 print(f"\n[INFO] Processing checkpoint: {ckpt_file}")
-                if clustering_probe:
-                    evaluate_clustering_multi_seed(ckpt_file, batch_size=32, 
-                                                    device="cuda",
-                                                    save_dir=curr_folder, 
-                                                   )
-                else:
-                    evaluate_multi_seed(ckpt_file, batch_size=32, 
-                                        device="cuda",
-                                        save_dir=curr_folder, #save_dir,
-                                        )
+                # if clustering_probe:
+                #     evaluate_clustering_multi_seed(ckpt_file, batch_size=32, 
+                #                                     device="cuda",
+                #                                     save_dir=curr_folder, 
+                #                                    )
+                # else:
+                evaluate_multi_seed(ckpt_file, batch_size=32, 
+                                    device="cuda",
+                                    save_dir=curr_folder, #save_dir,
+                                    clustering_probe=clustering_probe
+                                    )
                 completed_linear_probe.append(ckpt_file)
                 
                 gc.collect()
