@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.101.2 (2026-07-16)
+
+### Fix
+
+* fix: update main ([`059fe38`](https://github.com/agbleze/mining_sites_detector/commit/059fe385ad9b3e89bb8d68b8fe8a42c2ed04aac7))
+
 ## v0.101.1 (2026-07-15)
 
 ### Fix
