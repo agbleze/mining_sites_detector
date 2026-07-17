@@ -51,8 +51,6 @@ def evaluate_unsupervised_clustering(encoder, train_loader, test_loader,
                 
             else:
                 kmeans.partial_fit(features_flat)
-                #print(f"Partial fit of MiniBatch kmeans successfully")
-            #all_labels.append(labels.numpy())
 
     if not use_minibatch_kmeans:
         all_features = np.concatenate(all_features, axis=0)
