@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.102.0 (2026-07-17)
+
+### Feature
+
+* feat: remove comment-out code ([`ec82b30`](https://github.com/agbleze/mining_sites_detector/commit/ec82b300d79724d2483842fc8a2e8669b4777d07))
+
 ## v0.101.2 (2026-07-16)
 
 ### Fix
